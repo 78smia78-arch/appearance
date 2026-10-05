@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Appearance Adventure — SVG Edition</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+  body {
+    background: linear-gradient(135deg, #FFE5F1 0%, #E5F0FF 50%, #FFF5E5 100%);
+    min-height: 100vh; color: #2d3748; padding: 20px;
+  }
+  header { text-align: center; margin-bottom: 25px; }
+  h1 {
+    font-size: 2.8em; font-weight: 900;
+    background: linear-gradient(90deg, #FF6B9D, #FFB84D, #4DD4AC, #6BA3FF);
+    background-size: 300% 300%;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; animation: rainbow 5s ease infinite;
+    letter-spacing: -1px; margin-bottom: 5px;
+  }
+  @keyframes rainbow { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+  .subtitle { color: #4a5568; font-size: 1.05em; font-weight: 700; opacity: 0.8; }
+  .score-bar { display: flex; justify-content: center; gap: 15px; margin-top: 18px; flex-wrap: wrap; }
+  .score-item {
+    background: #fff; padding: 10px 22px; border-radius: 50px;
+    font-weight: 900; font-size: 1em;
+    box-shadow: 0 4px 0 #E2E8F0, 0 6px 15px rgba(0,0,0,0.08);
+    border: 3px solid #FFE5F1;
+  }
+  .score-item.xp { color: #FF6B9D; border-color: #FFB6D9; }
+  .score-item.streak { color: #FF9500; border-color: #FFD699; }
+  .score-item span { color: #4DD4AC; font-size: 1.15em; }
+
+  .menu {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; max-width: 1000px; margin: 0 auto 30px;
+  }
+  .menu-btn {
+    background: #fff; border: 3px solid #E2E8F0; padding: 16px 12px;
+    border-radius: 20px; cursor: pointer; text-align: center;
+    transition: all 0.2s; color: #2d3748; font-weight: 900; font-size: 0.95em;
+    font-family: 'Nunito', sans-serif; box-shadow: 0 5px 0 #CBD5E0;
+    position: relative; top: 0;
+  }
+  .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #CBD5E0; }
+  .menu-btn:active { transform: translateY(2px); box-shadow: 0 3px 0 #CBD5E0; }
+  .menu-btn.active {
+    background: linear-gradient(135deg, #FF6B9D, #FFB84D);
+    border-color: #FF6B9D; color: #fff; box-shadow: 0 5px 0 #D94070;
+  }
+  .menu-btn .emoji { font-size: 1.9em; display: block; margin-bottom: 4px; }
+
+  .screen { display: none; max-width: 1200px; margin: 0 auto; animation: slideIn 0.4s ease; }
+  .screen.active { display: block; }
+  @keyframes slideIn { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+  .mindmap-center { text-align: center; margin: 20px 0 30px; }
+  .mindmap-center .core {
+    display: inline-block;
+    background: linear-gradient(135deg, #FF6B9D, #FFB84D, #4DD4AC);
+    padding: 22px 55px; border-radius: 60px; font-size: 1.7em; font-weight: 900;
+    letter-spacing: 2px; color: #fff;
+    box-shadow: 0 8px 0 #D94070, 0 12px 30px rgba(255,107,157,0.4);
+    border: 4px solid #fff; animation: bounce 2.5s ease-in-out infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  .branches { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  .branch {
+    border-radius: 24px; padding: 20px; border: 4px solid;
+    transition: all 0.3s; cursor: pointer; background: #fff;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.08), 0 10px 20px rgba(0,0,0,0.05);
+  }
+  .branch:hover { transform: translateY(-6px) rotate(-0.5deg); }
+  .branch-header {
+    font-size: 1.25em; font-weight: 900; margin-bottom: 14px;
+    padding-bottom: 10px; border-bottom: 3px dashed;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .build   { background: linear-gradient(135deg, #FFF0F0, #FFE5E5); border-color: #FF8B8B; color: #D94040; }
+  .height  { background: linear-gradient(135deg, #FFF5E5, #FFECD1); border-color: #FFB84D; color: #D97A00; }
+  .face    { background: linear-gradient(135deg, #FFFDE5, #FFF9C4); border-color: #F0D000; color: #A88E00; }
+  .hair    { background: linear-gradient(135deg, #F0FFF5, #D4F5E0); border-color: #4DD4AC; color: #14936C; }
+  .age     { background: linear-gradient(135deg, #E5FFFA, #C4F0EA); border-color: #34C4B4; color: #148A7F; }
+  .skin    { background: linear-gradient(135deg, #FFF5EE, #FFE4D1); border-color: #FFA375; color: #C45A2A; }
+  .smile   { background: linear-gradient(135deg, #F0F5FF, #DDE9FF); border-color: #6BA3FF; color: #2952CC; }
+  .clothes { background: linear-gradient(135deg, #F5EEFF, #E5D4FF); border-color: #A375FF; color: #6B29CC; }
+  .shoes   { background: linear-gradient(135deg, #FFF0F5, #FFD6E5); border-color: #FF6B9D; color: #C43E75; }
+  .access  { background: linear-gradient(135deg, #F5FFF0, #E0FFCC); border-color: #8BD94D; color: #5A9421; }
+  .style   { background: linear-gradient(135deg, #FFF5F0, #FFE4D6); border-color: #FF8B5C; color: #C44D1F; }
+  .general { background: linear-gradient(135deg, #E5F5FF, #C4E5FF); border-color: #4DA6FF; color: #1863C4; }
+  .special { background: linear-gradient(135deg, #FFE5F5, #FFCCE5); border-color: #FF5CA6; color: #C41F73; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tag {
+    background: #fff; border: 2px solid; padding: 6px 12px;
+    border-radius: 20px; font-size: 0.82em; font-weight: 700;
+    transition: all 0.2s; color: #2d3748; border-color: currentColor;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+    cursor: pointer; position: relative;
+  }
+  .tag:hover { transform: scale(1.08) rotate(2deg); box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
+  .tag:active { transform: scale(0.98); }
+  .tag .ru { color: #718096; font-size: 0.85em; font-weight: 600; margin-left: 5px; font-style: italic; }
+
+  .tag.speaking {
+    background: linear-gradient(135deg, #FFE066, #FFB84D) !important;
+    color: #7A5A00 !important;
+    border-color: #FFB84D !important;
+    transform: scale(1.15) !important;
+    box-shadow: 0 0 20px rgba(255,184,77,0.8), 0 4px 0 rgba(0,0,0,0.1) !important;
+    animation: speakPulse 0.8s ease-in-out infinite;
+  }
+  .tag.speaking .ru { color: #7A5A00 !important; opacity: 0.8; }
+  @keyframes speakPulse {
+    0%,100% { transform: scale(1.15); }
+    50%     { transform: scale(1.22); }
+  }
+
+  .tag .speaker-icon {
+    position: absolute;
+    top: -6px; right: -6px;
+    background: #FF6B9D;
+    color: #fff;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    font-size: 10px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  .tag.speaking .speaker-icon { display: flex; }
+
+  .subgroup { margin-top: 14px; }
+  .subgroup-title {
+    font-size: 0.82em; font-weight: 900; margin-bottom: 8px;
+    text-transform: uppercase; letter-spacing: 1.5px; opacity: 0.85;
+  }
+  .branch-body { max-height: 5000px; overflow: hidden; transition: max-height 0.5s ease; }
+  .branch.collapsed .branch-body { max-height: 0; margin-top: 0; }
+
+  .mindmap-hint {
+    text-align: center;
+    background: #fff;
+    max-width: 600px;
+    margin: 0 auto 20px;
+    padding: 12px 25px;
+    border-radius: 50px;
+    border: 3px solid #FFB6D9;
+    box-shadow: 0 4px 0 #FFB6D9;
+    color: #FF6B9D;
+    font-weight: 900;
+    font-size: 0.95em;
+  }
+  .mindmap-hint .icon { margin-right: 8px; }
+
+  .game-title {
+    text-align: center; font-size: 2em; font-weight: 900; margin-bottom: 8px;
+    background: linear-gradient(90deg, #FF6B9D, #FFB84D);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .game-desc { text-align: center; color: #4a5568; margin-bottom: 25px; font-size: 1.05em; font-weight: 700; }
+
+  .restart-btn {
+    display: block; margin: 25px auto;
+    background: linear-gradient(135deg, #4DD4AC, #34C4B4);
+    border: 4px solid #fff; color: #fff; padding: 14px 34px;
+    border-radius: 50px; font-weight: 900; font-size: 1.05em;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 6px 0 #26A38B; font-family: 'Nunito', sans-serif;
+  }
+  .restart-btn:hover { transform: translateY(-3px); box-shadow: 0 9px 0 #26A38B; }
+  .restart-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 #26A38B; }
+
+  .feedback { text-align: center; font-size: 1.15em; font-weight: 900; min-height: 32px; margin: 15px 0; }
+  .feedback.correct { color: #26A38B; }
+  .feedback.wrong { color: #E53E3E; }
+
+  .characters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 14px; margin-bottom: 25px;
+  }
+  .character-card {
+    background: #fff; border: 4px solid #E2E8F0;
+    border-radius: 20px; padding: 12px 8px;
+    text-align: center; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 5px 0 #CBD5E0; position: relative; top: 0;
+  }
+  .character-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 9px 0 #CBD5E0;
+    border-color: #FF6B9D;
+  }
+  .character-card:active { top: 3px; box-shadow: 0 2px 0 #CBD5E0; }
+  .character-card.eliminated { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+  .character-card.winner {
+    border-color: #4DD4AC;
+    background: linear-gradient(135deg, #F0FFF5, #D4F5E0);
+    box-shadow: 0 0 40px rgba(77,212,172,0.6);
+    animation: winBounce 0.8s infinite;
+  }
+  @keyframes winBounce {
+    0%,100% { transform: scale(1) rotate(-2deg); }
+    50%     { transform: scale(1.08) rotate(2deg); }
+  }
+  .character-card svg { display: block; margin: 0 auto 6px; }
+  .character-card .name { font-size: 0.92em; color: #4a5568; font-weight: 900; }
+
+  .questions-panel {
+    background: #fff; border-radius: 24px; padding: 22px;
+    border: 4px solid #E2E8F0; box-shadow: 0 6px 0 rgba(0,0,0,0.06);
+  }
+  .questions-panel h3 { margin-bottom: 14px; color: #FF6B9D; font-size: 1.15em; }
+  .question-btn {
+    display: block; width: 100%; background: #F7FAFC;
+    border: 3px solid #E2E8F0; color: #2d3748;
+    padding: 12px 16px; border-radius: 16px; margin-bottom: 10px;
+    text-align: left; cursor: pointer; transition: all 0.2s;
+    font-size: 0.95em; font-weight: 700; font-family: 'Nunito', sans-serif;
+    box-shadow: 0 3px 0 #CBD5E0; position: relative; top: 0;
+  }
+  .question-btn:hover:not(:disabled) {
+    background: #FFF0F5; border-color: #FF6B9D;
+    transform: translateX(5px);
+  }
+  .question-btn:active:not(:disabled) { top: 2px; box-shadow: 0 1px 0 #CBD5E0; }
+  .question-btn:disabled { opacity: 0.7; cursor: not-allowed; }
+  .question-btn .answer {
+    float: right; font-weight: 900; padding: 2px 10px; border-radius: 12px;
+  }
+  .question-btn .answer.yes { color: #fff; background: #4DD4AC; }
+  .question-btn .answer.no { color: #fff; background: #FF6B9D; }
+
+  .build-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 25px; }
+  @media (max-width: 768px) { .build-layout { grid-template-columns: 1fr; } }
+  .preview {
+    background: linear-gradient(135deg, #FFF0F5, #FFE5F1);
+    border-radius: 24px; padding: 25px;
+    border: 4px dashed #FF6B9D; text-align: center;
+    position: sticky; top: 20px; height: fit-content;
+  }
+  .preview .avatar-big { animation: bounce 2s infinite; }
+  .preview .desc {
+    background: #fff; padding: 16px; border-radius: 16px;
+    font-size: 0.95em; line-height: 1.7; text-align: left;
+    color: #2d3748; margin-top: 15px; min-height: 100px;
+    font-weight: 700; border: 3px solid #FFB6D9;
+  }
+  .build-options { display: flex; flex-direction: column; gap: 14px; }
+  .option-group {
+    background: #fff; border-radius: 18px; padding: 16px;
+    border: 3px solid #E2E8F0; box-shadow: 0 4px 0 rgba(0,0,0,0.06);
+  }
+  .option-group h4 {
+    font-size: 0.95em; color: #FF6B9D; margin-bottom: 12px;
+    text-transform: uppercase; letter-spacing: 1px; font-weight: 900;
+  }
+  .option-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    background: #F7FAFC; border: 2px solid #E2E8F0;
+    padding: 8px 16px; border-radius: 20px; cursor: pointer;
+    transition: all 0.2s; font-size: 0.85em; font-weight: 700;
+    color: #2d3748; box-shadow: 0 3px 0 #CBD5E0;
+    position: relative; top: 0;
+  }
+  .chip:hover {
+    background: #FFF0F5; border-color: #FF6B9D;
+    transform: translateY(-2px); box-shadow: 0 5px 0 #FFB6D9;
+  }
+  .chip:active { top: 2px; box-shadow: 0 1px 0 #CBD5E0; }
+  .chip.selected {
+    background: linear-gradient(135deg, #FF6B9D, #FFB84D);
+    border-color: #FF6B9D; color: #fff;
+    box-shadow: 0 3px 0 #D94070; font-weight: 900;
+  }
+
+  .memory-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; max-width: 900px; margin: 0 auto; }
+  @media (max-width: 600px) { .memory-grid { grid-template-columns: repeat(3, 1fr); } }
+  .memory-card {
+    aspect-ratio: 1; background: linear-gradient(135deg, #FF6B9D, #FFB84D);
+    border-radius: 18px; display: flex; align-items: center; justify-content: center;
+    padding: 10px; text-align: center; cursor: pointer; transition: all 0.4s;
+    font-size: 0.82em; font-weight: 900; color: #fff;
+    border: 4px solid #fff; box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+    user-select: none; position: relative; top: 0;
+  }
+  .memory-card:hover:not(.flipped):not(.matched) {
+    transform: translateY(-3px) rotate(2deg); box-shadow: 0 8px 0 rgba(0,0,0,0.15);
+  }
+  .memory-card .content { display: none; }
+  .memory-card.flipped {
+    background: linear-gradient(135deg, #FFE066, #FFB84D);
+    color: #7A5A00; border-color: #FFD700; transform: rotateY(360deg);
+  }
+  .memory-card.flipped .content { display: block; }
+  .memory-card.matched {
+    background: linear-gradient(135deg, #4DD4AC, #26A38B);
+    color: #fff; cursor: default;
+    box-shadow: 0 0 25px rgba(77,212,172,0.7), 0 5px 0 #1A7D6B;
+    animation: matchPop 0.5s;
+  }
+  @keyframes matchPop { 0%{transform:scale(1)} 50%{transform:scale(1.15) rotate(5deg)} 100%{transform:scale(1)} }
+
+  .case-file {
+    background: linear-gradient(135deg, #FFF9E5, #FFF5D1);
+    border-left: 8px solid #FFB84D;
+    padding: 22px; border-radius: 18px; margin-bottom: 25px;
+    font-size: 1.05em; line-height: 1.8; font-weight: 700;
+    color: #6B4D00; box-shadow: 0 5px 0 rgba(255,184,77,0.3);
+  }
+  .case-file strong { color: #FF6B9D; }
+  .suspects-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;
+  }
+  .suspect {
+    background: #fff; border: 4px solid #E2E8F0;
+    border-radius: 20px; padding: 18px; text-align: center;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 5px 0 #CBD5E0; position: relative; top: 0;
+  }
+  .suspect:hover {
+    transform: translateY(-4px); border-color: #FF6B9D;
+    box-shadow: 0 9px 0 #FFB6D9;
+  }
+  .suspect:active { top: 3px; box-shadow: 0 2px 0 #CBD5E0; }
+  .suspect svg { display: block; margin: 0 auto 10px; }
+  .suspect .name { font-weight: 900; margin-bottom: 8px; color: #FF6B9D; font-size: 1.05em; }
+  .suspect .info { font-size: 0.82em; color: #4a5568; line-height: 1.5; font-weight: 600; }
+  .suspect.correct {
+    border-color: #4DD4AC;
+    background: linear-gradient(135deg, #F0FFF5, #D4F5E0);
+    animation: winBounce 0.8s infinite;
+  }
+  .suspect.wrong {
+    border-color: #FF6B9D;
+    background: linear-gradient(135deg, #FFF0F5, #FFE5F1);
+  }
+
+  .quiz-progress {
+    background: #E2E8F0; height: 18px; border-radius: 20px;
+    margin-bottom: 20px; overflow: hidden; border: 3px solid #fff;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  }
+  .quiz-progress-bar {
+    background: linear-gradient(90deg, #FF6B9D, #FFB84D);
+    height: 100%; transition: width 0.4s; border-radius: 20px;
+  }
+  .quiz-question {
+    font-size: 1.4em; text-align: center; margin: 25px 0;
+    min-height: 60px; font-weight: 900; color: #2d3748;
+  }
+  .quiz-options {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px; max-width: 750px; margin: 0 auto;
+  }
+  .quiz-option {
+    background: #fff; border: 4px solid #E2E8F0;
+    padding: 18px; border-radius: 18px; cursor: pointer;
+    transition: all 0.2s; font-size: 1em; color: #2d3748;
+    font-weight: 900; font-family: 'Nunito', sans-serif;
+    box-shadow: 0 5px 0 #CBD5E0; position: relative; top: 0;
+  }
+  .quiz-option:hover:not(:disabled) {
+    transform: translateY(-3px); border-color: #FF6B9D;
+    box-shadow: 0 8px 0 #FFB6D9;
+  }
+  .quiz-option:active:not(:disabled) { top: 3px; box-shadow: 0 2px 0 #CBD5E0; }
+  .quiz-option.correct {
+    background: linear-gradient(135deg, #4DD4AC, #26A38B);
+    color: #fff; border-color: #4DD4AC;
+    box-shadow: 0 5px 0 #1A7D6B; animation: matchPop 0.5s;
+  }
+  .quiz-option.wrong {
+    background: linear-gradient(135deg, #FF6B9D, #D94070);
+    color: #fff; border-color: #FF6B9D; box-shadow: 0 5px 0 #A82A55;
+  }
+  .quiz-timer {
+    text-align: center; font-size: 1.6em; font-weight: 900;
+    color: #FFB84D; margin-bottom: 15px;
+  }
+
+  .modal {
+    position: fixed; inset: 0; background: rgba(45,55,72,0.7);
+    backdrop-filter: blur(5px); display: none;
+    align-items: center; justify-content: center;
+    z-index: 999; padding: 20px;
+  }
+  .modal.active { display: flex; }
+  .modal-content {
+    background: linear-gradient(135deg, #FFF5F9, #FFF);
+    border: 6px solid #FF6B9D; border-radius: 30px;
+    padding: 45px; text-align: center; max-width: 500px;
+    box-shadow: 0 15px 0 #D94070, 0 20px 60px rgba(0,0,0,0.3);
+    animation: modalPop 0.4s;
+  }
+  @keyframes modalPop {
+    0% { transform: scale(0.5) rotate(-5deg); }
+    70% { transform: scale(1.05) rotate(2deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .modal-content h2 {
+    font-size: 2.2em; margin-bottom: 15px;
+    background: linear-gradient(90deg, #FF6B9D, #FFB84D);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; font-weight: 900;
+  }
+  .modal-content p { font-size: 1.15em; margin-bottom: 22px; color: #4a5568; font-weight: 700; }
+  .modal-content .big-emoji { font-size: 5em; margin-bottom: 15px; animation: bounce 1s infinite; }
+
+  footer {
+    text-align: center; margin-top: 50px; padding-top: 25px;
+    border-top: 3px dashed #E2E8F0; color: #718096;
+    font-size: 0.9em; font-weight: 700;
+  }
+
+  .confetti {
+    position: fixed; width: 12px; height: 12px;
+    pointer-events: none; z-index: 1000; border-radius: 2px;
+    animation: fall 2.5s linear forwards;
+  }
+  @keyframes fall {
+    0% { top: -20px; transform: rotate(0deg) translateX(0); opacity: 1; }
+    100% { top: 100vh; transform: rotate(720deg) translateX(100px); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎮 Appearance Adventure</h1>
+  <p class="subtitle">A2+ English · Learn by playing 🚀</p>
+  <div class="score-bar">
+    <div class="score-item xp">🏆 Score: <span id="globalScore">0</span></div>
+    <div class="score-item streak">🔥 Streak: <span id="streak">0</span></div>
+  </div>
+</header>
+
+<nav class="menu">
+  <button class="menu-btn active" data-screen="mindmap"><span class="emoji">🧠</span>Mind Map</button>
+  <button class="menu-btn" data-screen="guesswho"><span class="emoji">🕵️</span>Guess Who</button>
+  <button class="menu-btn" data-screen="build"><span class="emoji">🎨</span>Build a Character</button>
+  <button class="menu-btn" data-screen="memory"><span class="emoji">🃏</span>Memory Match</button>
+  <button class="menu-btn" data-screen="detective"><span class="emoji">🔍</span>Detective</button>
+  <button class="menu-btn" data-screen="quiz"><span class="emoji">⚡</span>Quiz Battle</button>
+  <button class="menu-btn" data-screen="describe"><span class="emoji">🖼️</span>Describe It</button>
+</nav>
+
+<!-- MIND MAP -->
+<section class="screen active" id="mindmap">
+  <div class="mindmap-center"><div class="core">👤 APPEARANCE</div></div>
+  <div class="mindmap-hint">
+    <span class="icon">🔊</span> Клікни на слово — почуєш вимову англійською!
+  </div>
+  <div class="branches">
+
+    <div class="branch build" onclick="toggleBranch(event, this)">
+      <div class="branch-header">🏋️ BUILD</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="slim">slim<span class="ru">стрункий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="thin">thin<span class="ru">худий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="skinny">skinny<span class="ru">худорлявий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="slender">slender<span class="ru">витончений</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="muscular">muscular<span class="ru">мускулистий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="athletic">athletic<span class="ru">спортивний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="well-built">well-built<span class="ru">добре збудований</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="stocky">stocky<span class="ru">кремезний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="chubby">chubby<span class="ru">пухкий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="plump">plump<span class="ru">повний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="overweight">overweight<span class="ru">із зайвою вагою</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="medium build">medium build<span class="ru">середній</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="petite">petite<span class="ru">мініатюрна</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="broad-shouldered">broad-shouldered<span class="ru">широкоплечий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="narrow-shouldered">narrow-shouldered<span class="ru">вузькоплечий</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch height" onclick="toggleBranch(event, this)">
+      <div class="branch-header">📏 HEIGHT</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="tall">tall<span class="ru">високий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="short">short<span class="ru">низький</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="medium height">medium height<span class="ru">середній</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="average height">average height<span class="ru">середній</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="quite tall">quite tall<span class="ru">досить високий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="rather short">rather short<span class="ru">досить низький</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="very tall">very tall<span class="ru">дуже високий</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch face" onclick="toggleBranch(event, this)">
+      <div class="branch-header">😊 FACE</div>
+      <div class="branch-body">
+        <div class="subgroup"><div class="subgroup-title">🔷 Face Shape</div><div class="tags">
+          <span class="tag" data-en="oval">oval<span class="ru">овальне</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="round">round<span class="ru">кругле</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="square">square<span class="ru">квадратне</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="heart-shaped">heart-shaped<span class="ru">у формі серця</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="long">long<span class="ru">витягнуте</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="triangular">triangular<span class="ru">трикутне</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="diamond-shaped">diamond-shaped<span class="ru">ромбоподібне</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Forehead</div><div class="tags">
+          <span class="tag" data-en="high">high<span class="ru">високий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="low">low<span class="ru">низький</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="broad">broad<span class="ru">широкий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="narrow">narrow<span class="ru">вузький</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="wrinkled">wrinkled<span class="ru">зморшкуватий</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Nose</div><div class="tags">
+          <span class="tag" data-en="straight">straight<span class="ru">прямий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="long">long<span class="ru">довгий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="short">short<span class="ru">короткий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="wide">wide<span class="ru">широкий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="narrow">narrow<span class="ru">вузький</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="hooked">hooked<span class="ru">з горбинкою</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="turned-up">turned-up<span class="ru">кирпатий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="snub">snub<span class="ru">кирпатий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="flat">flat<span class="ru">плаский</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="pointed">pointed<span class="ru">гострий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="button nose">button nose<span class="ru">ніс-ґудзик</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Mouth</div><div class="tags">
+          <span class="tag" data-en="big">big<span class="ru">великий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="small">small<span class="ru">маленький</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="wide">wide<span class="ru">широкий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="full lips">full lips<span class="ru">повні губи</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="thin lips">thin lips<span class="ru">тонкі губи</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="rosy lips">rosy lips<span class="ru">рожеві губи</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Eyes</div><div class="tags">
+          <span class="tag" data-en="big">big<span class="ru">великі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="small">small<span class="ru">маленькі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="round">round<span class="ru">круглі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="almond-shaped">almond-shaped<span class="ru">мигдалеподібні</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="narrow">narrow<span class="ru">вузькі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="deep-set">deep-set<span class="ru">глибоко посаджені</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="close-set">close-set<span class="ru">близько посаджені</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="wide-set">wide-set<span class="ru">широко посаджені</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="blue eyes">blue eyes<span class="ru">блакитні</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="grey eyes">grey eyes<span class="ru">сірі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="green eyes">green eyes<span class="ru">зелені</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="hazel eyes">hazel eyes<span class="ru">горіхові</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="brown eyes">brown eyes<span class="ru">карі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="black eyes">black eyes<span class="ru">чорні</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Eyebrows</div><div class="tags">
+          <span class="tag" data-en="thick eyebrows">thick eyebrows<span class="ru">густі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="thin eyebrows">thin eyebrows<span class="ru">тонкі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="dark eyebrows">dark eyebrows<span class="ru">темні</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="light eyebrows">light eyebrows<span class="ru">світлі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="arched eyebrows">arched eyebrows<span class="ru">дугоподібні</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="straight eyebrows">straight eyebrows<span class="ru">прямі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="bushy eyebrows">bushy eyebrows<span class="ru">кошлаті</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Eyelashes</div><div class="tags">
+          <span class="tag" data-en="long eyelashes">long eyelashes<span class="ru">довгі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="short eyelashes">short eyelashes<span class="ru">короткі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="thick eyelashes">thick eyelashes<span class="ru">густі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="curly eyelashes">curly eyelashes<span class="ru">загнуті</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Cheeks</div><div class="tags">
+          <span class="tag" data-en="rosy">rosy<span class="ru">рожеві</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="pale">pale<span class="ru">бліді</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="chubby">chubby<span class="ru">пухкі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="hollow">hollow<span class="ru">впалі</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="freckled">freckled<span class="ru">веснянкуваті</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Chin</div><div class="tags">
+          <span class="tag" data-en="round chin">round chin<span class="ru">кругле</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="square chin">square chin<span class="ru">квадратне</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="pointed chin">pointed chin<span class="ru">гостре</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="double chin">double chin<span class="ru">подвійне</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="strong chin">strong chin<span class="ru">вольове</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="branch hair" onclick="toggleBranch(event, this)">
+      <div class="branch-header">💇 HAIR</div>
+      <div class="branch-body">
+        <div class="subgroup"><div class="subgroup-title">🔷 Length</div><div class="tags">
+          <span class="tag" data-en="long hair">long hair<span class="ru">довге</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="short hair">short hair<span class="ru">коротке</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="medium-length hair">medium-length hair<span class="ru">середнє</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="shoulder-length hair">shoulder-length hair<span class="ru">до плечей</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="waist-length hair">waist-length hair<span class="ru">до поясу</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Type</div><div class="tags">
+          <span class="tag" data-en="straight hair">straight hair<span class="ru">пряме</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="wavy hair">wavy hair<span class="ru">хвилясте</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="curly hair">curly hair<span class="ru">кучеряве</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="frizzy hair">frizzy hair<span class="ru">пухнасте</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="thick hair">thick hair<span class="ru">густе</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="thin hair">thin hair<span class="ru">рідке</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="fine hair">fine hair<span class="ru">тонке</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="coarse hair">coarse hair<span class="ru">жорстке</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Colour</div><div class="tags">
+          <span class="tag" data-en="black hair">black hair<span class="ru">чорне</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="dark brown hair">dark brown hair<span class="ru">темно-каштанове</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="brown hair">brown hair<span class="ru">каштанове</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="light brown hair">light brown hair<span class="ru">світло-каштанове</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="blond hair">blond hair<span class="ru">світле</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="red hair">red hair<span class="ru">руде</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="ginger hair">ginger hair<span class="ru">рудувате</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="grey hair">grey hair<span class="ru">сиве</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="white hair">white hair<span class="ru">біле</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="dyed hair">dyed hair<span class="ru">фарбоване</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="highlighted hair">highlighted hair<span class="ru">меліроване</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+        <div class="subgroup"><div class="subgroup-title">🔷 Style</div><div class="tags">
+          <span class="tag" data-en="bald">bald<span class="ru">лисий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="balding">balding<span class="ru">лисіючий</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="a ponytail">a ponytail<span class="ru">хвіст</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="a bun">a bun<span class="ru">пучок</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="braids">braids<span class="ru">коси</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="a fringe">a fringe<span class="ru">чубчик</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="bangs">bangs<span class="ru">чубчик</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="a bob">a bob<span class="ru">каре</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="a buzz cut">a buzz cut<span class="ru">коротка стрижка</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="dreadlocks">dreadlocks<span class="ru">дреди</span><span class="speaker-icon">🔊</span></span>
+          <span class="tag" data-en="a mohawk">a mohawk<span class="ru">ірокез</span><span class="speaker-icon">🔊</span></span>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="branch age" onclick="toggleBranch(event, this)">
+      <div class="branch-header">🎂 AGE</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="young">young<span class="ru">молодий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="middle-aged">middle-aged<span class="ru">середній вік</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="elderly">elderly<span class="ru">літній</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="old">old<span class="ru">старий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a teenager">a teenager<span class="ru">підліток</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a child">a child<span class="ru">дитина</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a baby">a baby<span class="ru">немовля</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="in his twenties">in his twenties<span class="ru">у 20 років</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="in her thirties">in her thirties<span class="ru">у 30 років</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="about thirty">about thirty<span class="ru">близько 30</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch skin" onclick="toggleBranch(event, this)">
+      <div class="branch-header">🎨 SKIN</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="fair skin">fair skin<span class="ru">світла</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="pale skin">pale skin<span class="ru">бліда</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="olive skin">olive skin<span class="ru">оливкова</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="tanned skin">tanned skin<span class="ru">засмагла</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="dark skin">dark skin<span class="ru">темна</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="smooth skin">smooth skin<span class="ru">гладка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="freckled skin">freckled skin<span class="ru">у веснянках</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch smile" onclick="toggleBranch(event, this)">
+      <div class="branch-header">🦷 SMILE & TEETH</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="white teeth">white teeth<span class="ru">білі зуби</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="straight teeth">straight teeth<span class="ru">рівні зуби</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="crooked teeth">crooked teeth<span class="ru">криві зуби</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a gap between teeth">a gap between teeth<span class="ru">щілинка між зубами</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="braces">braces<span class="ru">брекети</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a friendly smile">a friendly smile<span class="ru">привітна усмішка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a bright smile">a bright smile<span class="ru">яскрава усмішка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a shy smile">a shy smile<span class="ru">сором'язлива усмішка</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch clothes" onclick="toggleBranch(event, this)">
+      <div class="branch-header">👕 CLOTHES</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="a T-shirt">a T-shirt<span class="ru">футболка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a shirt">a shirt<span class="ru">сорочка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a dress">a dress<span class="ru">сукня</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a skirt">a skirt<span class="ru">спідниця</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="jeans">jeans<span class="ru">джинси</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="trousers">trousers<span class="ru">штани</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="shorts">shorts<span class="ru">шорти</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a jacket">a jacket<span class="ru">куртка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a coat">a coat<span class="ru">пальто</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a suit">a suit<span class="ru">костюм</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a sweater">a sweater<span class="ru">светр</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a hoodie">a hoodie<span class="ru">худі</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch shoes" onclick="toggleBranch(event, this)">
+      <div class="branch-header">👟 SHOES</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="sneakers">sneakers<span class="ru">кросівки</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="trainers">trainers<span class="ru">кросівки (BrE)</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="boots">boots<span class="ru">черевики</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="high heels">high heels<span class="ru">підбори</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="sandals">sandals<span class="ru">сандалі</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="flip-flops">flip-flops<span class="ru">шльопанці</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="loafers">loafers<span class="ru">лофери</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch access" onclick="toggleBranch(event, this)">
+      <div class="branch-header">💍 ACCESSORIES</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="earrings">earrings<span class="ru">сережки</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a necklace">a necklace<span class="ru">намисто</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a watch">a watch<span class="ru">годинник</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a ring">a ring<span class="ru">каблучка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a bracelet">a bracelet<span class="ru">браслет</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a bag">a bag<span class="ru">сумка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a hat">a hat<span class="ru">капелюх</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a cap">a cap<span class="ru">кепка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a scarf">a scarf<span class="ru">шарф</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch style" onclick="toggleBranch(event, this)">
+      <div class="branch-header">👔 STYLE</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="casual">casual<span class="ru">повсякденний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="formal">formal<span class="ru">формальний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="sporty">sporty<span class="ru">спортивний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="elegant">elegant<span class="ru">елегантний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="trendy">trendy<span class="ru">модний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="classic">classic<span class="ru">класичний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="scruffy">scruffy<span class="ru">неохайний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="tidy">tidy<span class="ru">охайний</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch general" onclick="toggleBranch(event, this)">
+      <div class="branch-header">✨ GENERAL</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="good-looking">good-looking<span class="ru">привабливий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="attractive">attractive<span class="ru">привабливий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="pretty">pretty<span class="ru">гарненька</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="handsome">handsome<span class="ru">вродливий (ч.)</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="beautiful">beautiful<span class="ru">красива</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="cute">cute<span class="ru">милий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="ugly">ugly<span class="ru">некрасивий</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="plain">plain<span class="ru">непримітний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="elegant">elegant<span class="ru">елегантний</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="well-dressed">well-dressed<span class="ru">добре вдягнений</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="smart">smart<span class="ru">охайний (BrE)</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+    <div class="branch special" onclick="toggleBranch(event, this)">
+      <div class="branch-header">🔍 SPECIAL</div>
+      <div class="branch-body"><div class="tags">
+        <span class="tag" data-en="glasses">glasses<span class="ru">окуляри</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a beard">a beard<span class="ru">борода</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a moustache">a moustache<span class="ru">вуса</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="freckles">freckles<span class="ru">веснянки</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a mole">a mole<span class="ru">родимка</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a scar">a scar<span class="ru">шрам</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a tattoo">a tattoo<span class="ru">татуювання</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a piercing">a piercing<span class="ru">пірсинг</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="dimples">dimples<span class="ru">ямки на щоках</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="wrinkles">wrinkles<span class="ru">зморшки</span><span class="speaker-icon">🔊</span></span>
+        <span class="tag" data-en="a birthmark">a birthmark<span class="ru">родима пляма</span><span class="speaker-icon">🔊</span></span>
+      </div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- GUESS WHO -->
+<section class="screen" id="guesswho">
+  <h2 class="game-title">🕵️ Guess Who?</h2>
+  <p class="game-desc">The computer has chosen a character. Ask questions and guess!</p>
+  <div id="guesswhoContent"></div>
+  <button class="restart-btn" onclick="initGuessWho()">🔄 New Game</button>
+</section>
+
+<!-- BUILD -->
+<section class="screen" id="build">
+  <h2 class="game-title">🎨 Build a Character</h2>
+  <p class="game-desc">Choose the features — the character and full description update automatically!</p>
+  <div class="build-layout">
+    <div class="preview">
+      <div class="avatar-big" id="avatarBig"></div>
+      <div class="desc" id="charDesc">Choose the options below...</div>
+    </div>
+    <div class="build-options" id="buildOptions"></div>
+  </div>
+  <button class="restart-btn" onclick="randomCharacter()">🎲 Random Character</button>
+</section>
+
+<!-- MEMORY -->
+<section class="screen" id="memory">
+  <h2 class="game-title">🃏 Memory Match</h2>
+  <p class="game-desc">Find the pairs: English word ↔ Ukrainian translation. 30 pairs!</p>
+  <div class="memory-grid" id="memoryGrid"></div>
+  <button class="restart-btn" onclick="initMemory()">🔄 New Game</button>
+</section>
+
+<!-- DETECTIVE -->
+<section class="screen" id="detective">
+  <h2 class="game-title">🔍 Detective Case</h2>
+  <p class="game-desc">Read the witness description and find the criminal!</p>
+  <div id="detectiveContent"></div>
+  <button class="restart-btn" onclick="initDetective()">🔄 New Case</button>
+</section>
+
+<!-- QUIZ -->
+<section class="screen" id="quiz">
+  <h2 class="game-title">⚡ Quiz Battle</h2>
+  <p class="game-desc">Answer 30 questions. Beat the timer!</p>
+  <div id="quizContent"></div>
+  <button class="restart-btn" onclick="initQuiz()">🔄 New Game</button>
+</section>
+
+<!-- DESCRIBE IT -->
+<section class="screen" id="describe">
+  <h2 class="game-title">🖼️ Describe It</h2>
+  <p class="game-desc">Look at the character and choose the correct description!</p>
+  <div id="describeContent"></div>
+  <button class="restart-btn" onclick="initDescribe()">🔄 New Character</button>
+</section>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="big-emoji" id="modalEmoji">🎉</div>
+    <h2 id="modalTitle">Great!</h2>
+    <p id="modalText">You did it!</p>
+    <button class="restart-btn" onclick="closeModal()">Continue</button>
+  </div>
+</div>
+
+<footer>💜 Appearance Adventure · SVG Edition · A2+ English</footer>
+
+<script>
+/* ============================================================
+   SPEECH + MIND MAP
+============================================================ */
+function toggleBranch(event, branch) {
+  if (event.target.closest('.tag')) return;
+  branch.classList.toggle('collapsed');
+}
+
+function speakWord(word, tagEl) {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  document.querySelectorAll('.tag.speaking').forEach(t => t.classList.remove('speaking'));
+  tagEl.classList.add('speaking');
+  const clearSpeaking = () => tagEl.classList.remove('speaking');
+
+  if ('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(word);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.85;
+    const voices = window.speechSynthesis.getVoices();
+    const enVoice = voices.find(v => v.lang === 'en-US' && v.name.includes('Google'))
+                 || voices.find(v => v.lang === 'en-US')
+                 || voices.find(v => v.lang.startsWith('en'));
+    if (enVoice) utterance.voice = enVoice;
+    utterance.onend = clearSpeaking;
+    utterance.onerror = clearSpeaking;
+    window.speechSynthesis.speak(utterance);
+  } else {
+    setTimeout(clearSpeaking, 1500);
+  }
+}
+
+document.querySelectorAll('.tag').forEach(tag => {
+  tag.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const word = tag.dataset.en || tag.textContent.trim();
+    speakWord(word, tag);
+  });
+});
+
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+}
+
+/* ============================================================
+   SVG CHARACTER GENERATOR
+============================================================ */
+function makeCharacterSVG(cfg, width = 140, height = 260) {
+  const {
+    hairColor = 'dark', hairType = 'short', hairLength = 'short',
+    eyeColor = '#4A90E2', eyeShape = 'round', eyeSize = 'medium',
+    skinColor = '#FFD9B3',
+    shirtColor = '#4A90E2', pantsColor = '#2E5AAC', shoeColor = '#ffffff',
+    dressColor = null, jacketColor = null, coatColor = null,
+    skirtColor = null, shortsColor = null, sweaterColor = null, hoodieColor = null,
+    glasses = false, beard = false, moustache = false,
+    freckles = false, dimples = false, mole = false,
+    scar = false, tattoo = false, piercing = false, birthmark = false,
+    smileType = 'friendly', teeth = 'normal',
+    noseType = 'straight', mouthType = 'medium',
+    eyebrowType = 'normal', eyelashType = 'normal',
+    cheekType = 'normal', chinType = 'round', faceShape = 'oval',
+    foreheadType = 'normal',
+    gender = 'm', bald = false,
+    age = 'young', heightType = 'medium height',
+    buildType = 'medium',
+    earrings = false, necklace = false, watch = false,
+    ring = false, bracelet = false, bag = false,
+    hat = false, cap = false, scarf = false,
+    clothesType = 'tshirt', shoesType = 'sneakers'
+  } = cfg;
+
+  const hairColorMap = {
+    'dark': '#3D2817', 'blond': '#FFE066', 'red': '#D97757',
+    'grey': '#B8B8B8', 'brown': '#6B4423', 'black': '#1a1a1a',
+    'white': '#F0F0F0', 'ginger': '#E07A3F'
+  };
+  const hColor = hairColorMap[hairColor] || hairColor;
+
+  /* BUILD */
+  let shoulderWidth = 46, armWidth = 15, armX = 30, torsoWidth = 46;
+  let bodyColor = shirtColor;
+  let legWidth = 18, legX1 = 50, legX2 = 72;
+
+  if (buildType === 'slim' || buildType === 'thin' || buildType === 'skinny' || buildType === 'slender' || buildType === 'petite') {
+    shoulderWidth = 38; armWidth = 12; armX = 33; torsoWidth = 38;
+    legWidth = 14; legX1 = 54; legX2 = 72;
+  } else if (buildType === 'muscular' || buildType === 'athletic' || buildType === 'well-built' || buildType === 'broad-shouldered') {
+    shoulderWidth = 56; armWidth = 18; armX = 25; torsoWidth = 56;
+    legWidth = 20; legX1 = 48; legX2 = 72;
+  } else if (buildType === 'stocky' || buildType === 'chubby' || buildType === 'plump' || buildType === 'overweight') {
+    shoulderWidth = 60; armWidth = 20; armX = 22; torsoWidth = 60;
+    legWidth = 22; legX1 = 46; legX2 = 72;
+  } else if (buildType === 'narrow-shouldered') {
+    shoulderWidth = 40; armWidth = 12; armX = 32; torsoWidth = 44;
+  }
+
+  /* HEIGHT */
+  let scaleY = 1;
+  if (heightType === 'tall' || heightType === 'quite tall' || heightType === 'very tall') scaleY = 1.12;
+  else if (heightType === 'short' || heightType === 'rather short') scaleY = 0.88;
+
+  /* FACE SHAPE */
+  let faceRx = 33, faceRy = 38;
+  if (faceShape === 'round') { faceRx = 36; faceRy = 34; }
+  else if (faceShape === 'square') { faceRx = 36; faceRy = 34; }
+  else if (faceShape === 'long') { faceRx = 28; faceRy = 42; }
+  else if (faceShape === 'heart-shaped') { faceRx = 34; faceRy = 36; }
+  else if (faceShape === 'triangular') { faceRx = 32; faceRy = 38; }
+  else if (faceShape === 'diamond-shaped') { faceRx = 30; faceRy = 40; }
+
+  /* FORHEAD */
+  let foreheadSVG = '';
+  if (foreheadType === 'high') foreheadSVG = `<path d="M 55 30 Q 70 22 85 30" stroke="rgba(0,0,0,0.1)" stroke-width="2" fill="none"/>`;
+  else if (foreheadType === 'low') foreheadSVG = `<path d="M 55 38 Q 70 34 85 38" stroke="rgba(0,0,0,0.1)" stroke-width="2" fill="none"/>`;
+  else if (foreheadType === 'broad') foreheadSVG = `<path d="M 48 34 L 92 34" stroke="rgba(0,0,0,0.1)" stroke-width="2" fill="none"/>`;
+  else if (foreheadType === 'narrow') foreheadSVG = `<path d="M 58 34 L 82 34" stroke="rgba(0,0,0,0.1)" stroke-width="2" fill="none"/>`;
+  else if (foreheadType === 'wrinkled') foreheadSVG = `
+    <path d="M 54 32 L 86 32" stroke="#8B6F4A" stroke-width="1" fill="none"/>
+    <path d="M 54 36 L 86 36" stroke="#8B6F4A" stroke-width="1" fill="none"/>
+  `;
+
+  /* AGE */
+  let wrinklesSVG = '';
+  let finalHairColor = hColor;
+  if (age === 'middle-aged') {
+    wrinklesSVG = `
+      <path d="M 45 50 L 50 50" stroke="#8B6F4A" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M 90 50 L 95 50" stroke="#8B6F4A" stroke-width="1.2" stroke-linecap="round"/>
+    `;
+  } else if (age === 'elderly' || age === 'old') {
+    wrinklesSVG = `
+      <path d="M 44 48 L 50 48 M 44 52 L 50 52" stroke="#8B6F4A" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M 90 48 L 96 48 M 90 52 L 96 52" stroke="#8B6F4A" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M 62 82 Q 70 86 78 82" stroke="#8B6F4A" stroke-width="1" fill="none" stroke-linecap="round"/>
+    `;
+    if (!bald && hairColor !== 'grey' && hairColor !== 'white' && hairColor !== 'blond') {
+      finalHairColor = '#B8B8B8';
+    }
+  }
+
+  /* HAIR */
+  let hairBack = '', hairFront = '';
+  if (bald) {
+    hairFront = '';
+  } else if (hairType === 'balding') {
+    hairFront = `
+      <path d="M 45 50 Q 45 42 55 42" stroke="${finalHairColor}" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M 85 50 Q 85 42 75 42" stroke="${finalHairColor}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    `;
+  } else if (hairLength === 'long' || hairLength === 'waist-length' || hairLength === 'shoulder-length') {
+    hairBack = `<path d="M 36 60 Q 30 130 42 180 L 98 180 Q 110 130 104 60 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>`;
+    hairFront = `
+      <path d="M 37 45 Q 70 5 103 45 Q 100 20 70 12 Q 40 20 37 45 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+      <path d="M 40 60 Q 38 90 42 130" stroke="${finalHairColor}" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M 100 60 Q 102 90 98 130" stroke="${finalHairColor}" stroke-width="4" fill="none" stroke-linecap="round"/>
+    `;
+  } else if (hairType === 'curly' || hairType === 'frizzy') {
+    hairFront = `
+      <circle cx="42" cy="35" r="11" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <circle cx="55" cy="22" r="12" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <circle cx="70" cy="18" r="13" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <circle cx="85" cy="22" r="12" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <circle cx="98" cy="35" r="11" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <circle cx="40" cy="50" r="9" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <circle cx="100" cy="50" r="9" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  } else if (hairType === 'wavy') {
+    hairFront = `
+      <path d="M 37 48 Q 40 32 55 26 Q 70 20 85 26 Q 100 32 103 48 Q 100 40 90 38 Q 80 42 70 40 Q 60 42 50 38 Q 40 40 37 48 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+      <path d="M 38 55 Q 45 48 50 55 Q 45 62 38 55 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <path d="M 102 55 Q 95 48 90 55 Q 95 62 102 55 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  } else if (hairType === 'mohawk') {
+    hairFront = `
+      <path d="M 60 20 Q 70 -10 80 20 Q 75 10 70 15 Q 65 10 60 20 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+      <path d="M 40 45 Q 70 30 100 45 Q 95 38 70 35 Q 45 38 40 45 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else if (hairType === 'buzz cut') {
+    hairFront = `<path d="M 40 45 Q 70 30 100 45 L 100 40 Q 70 28 40 40 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>`;
+  } else if (hairType === 'dreadlocks') {
+    hairFront = `
+      <path d="M 37 42 Q 70 8 103 42" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+      <line x1="45" y1="30" x2="40" y2="55" stroke="${finalHairColor}" stroke-width="3"/>
+      <line x1="55" y1="25" x2="52" y2="55" stroke="${finalHairColor}" stroke-width="3"/>
+      <line x1="65" y1="22" x2="63" y2="55" stroke="${finalHairColor}" stroke-width="3"/>
+      <line x1="75" y1="22" x2="77" y2="55" stroke="${finalHairColor}" stroke-width="3"/>
+      <line x1="85" y1="25" x2="88" y2="55" stroke="${finalHairColor}" stroke-width="3"/>
+      <line x1="95" y1="30" x2="100" y2="55" stroke="${finalHairColor}" stroke-width="3"/>
+    `;
+  } else if (hairType === 'ponytail') {
+    hairFront = `
+      <path d="M 37 42 Q 70 8 103 42 Q 100 20 70 15 Q 40 20 37 42 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+      <ellipse cx="105" cy="80" rx="10" ry="30" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else if (hairType === 'bun') {
+    hairFront = `
+      <path d="M 37 42 Q 70 8 103 42 Q 100 20 70 15 Q 40 20 37 42 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+      <circle cx="70" cy="10" r="14" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else if (hairType === 'bob') {
+    hairFront = `
+      <path d="M 37 45 Q 70 5 103 45 Q 103 70 103 90 L 100 90 Q 100 60 95 50 Q 70 40 45 50 Q 40 60 40 90 L 37 90 Q 37 70 37 45 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else {
+    hairFront = `<path d="M 37 42 Q 70 8 103 42 Q 100 20 70 15 Q 40 20 37 42 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>`;
+  }
+  if (hairType === 'fringe' || hairType === 'bangs') {
+    hairFront += `<path d="M 40 42 Q 55 55 70 42 Q 85 55 100 42 Q 95 30 70 28 Q 45 30 40 42 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>`;
+  }
+
+  /* GLASSES */
+  let glassesSVG = '';
+  if (glasses) {
+    glassesSVG = `
+      <circle cx="58" cy="55" r="11" fill="none" stroke="#2d3748" stroke-width="2.5"/>
+      <circle cx="82" cy="55" r="11" fill="none" stroke="#2d3748" stroke-width="2.5"/>
+      <line x1="69" y1="55" x2="71" y2="55" stroke="#2d3748" stroke-width="2.5"/>
+      <line x1="47" y1="55" x2="43" y2="52" stroke="#2d3748" stroke-width="2.5"/>
+      <line x1="93" y1="55" x2="97" y2="52" stroke="#2d3748" stroke-width="2.5"/>
+    `;
+  }
+
+  /* BEARD */
+  let beardSVG = '';
+  if (beard) {
+    beardSVG = `<path d="M 45 65 Q 45 90 70 92 Q 95 90 95 65 Q 90 78 70 80 Q 50 78 45 65 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="2"/>`;
+  }
+  if (moustache) {
+    beardSVG += `<path d="M 58 72 Q 70 68 82 72 Q 78 76 70 75 Q 62 76 58 72 Z" fill="${finalHairColor}" stroke="#2d3748" stroke-width="1.5"/>`;
+  }
+
+  /* FRECKLES */
+  let frecklesSVG = '';
+  if (freckles) {
+    frecklesSVG = `
+      <circle cx="50" cy="68" r="1.4" fill="#D97757"/>
+      <circle cx="56" cy="70" r="1.4" fill="#D97757"/>
+      <circle cx="52" cy="74" r="1.4" fill="#D97757"/>
+      <circle cx="84" cy="68" r="1.4" fill="#D97757"/>
+      <circle cx="90" cy="70" r="1.4" fill="#D97757"/>
+      <circle cx="88" cy="74" r="1.4" fill="#D97757"/>
+    `;
+  }
+
+  /* DIMPLES */
+  let dimplesSVG = '';
+  if (dimples) {
+    dimplesSVG = `
+      <path d="M 52 78 Q 54 82 56 78" stroke="#B87333" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      <path d="M 84 78 Q 86 82 88 78" stroke="#B87333" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    `;
+  }
+
+  /* MARKS */
+  let marksSVG = '';
+  if (mole) marksSVG += `<circle cx="48" cy="62" r="2" fill="#5A3A1A"/>`;
+  if (scar) marksSVG += `<path d="M 88 60 L 92 66" stroke="#8B4A2A" stroke-width="1.8" stroke-linecap="round"/>`;
+  if (tattoo) marksSVG += `<path d="M ${armX+3} 118 L ${armX+8} 123 L ${armX+3} 128 M ${armX+armWidth-3} 118 L ${armX+armWidth+2} 123 L ${armX+armWidth-3} 128" stroke="#4A90E2" stroke-width="2" fill="none"/>`;
+  if (piercing) marksSVG += `<circle cx="58" cy="72" r="1.8" fill="#FFD700" stroke="#8B6914" stroke-width="0.5"/>`;
+  if (birthmark) marksSVG += `<ellipse cx="80" cy="80" rx="4" ry="3" fill="#8B4A2A" opacity="0.5"/>`;
+
+  /* SMILE */
+  let smileSVG = '';
+  if (smileType === 'friendly') smileSVG = `<path d="M 58 78 Q 70 90 82 78" stroke="#2d3748" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  else if (smileType === 'bright') smileSVG = `<path d="M 58 76 Q 70 90 82 76 Z" fill="#fff" stroke="#2d3748" stroke-width="2"/>`;
+  else if (smileType === 'shy') smileSVG = `<path d="M 62 80 Q 70 85 78 80" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else if (smileType === 'kind') smileSVG = `<path d="M 58 78 Q 70 88 82 78" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else smileSVG = `<line x1="60" y1="80" x2="80" y2="80" stroke="#2d3748" stroke-width="2.5" stroke-linecap="round"/>`;
+
+  if (teeth === 'braces') {
+    smileSVG += `<line x1="60" y1="82" x2="80" y2="82" stroke="#C0C0C0" stroke-width="1.2"/>`;
+    smileSVG += `<line x1="64" y1="79" x2="64" y2="85" stroke="#C0C0C0" stroke-width="1"/>`;
+    smileSVG += `<line x1="70" y1="79" x2="70" y2="85" stroke="#C0C0C0" stroke-width="1"/>`;
+    smileSVG += `<line x1="76" y1="79" x2="76" y2="85" stroke="#C0C0C0" stroke-width="1"/>`;
+  } else if (teeth === 'gap') {
+    smileSVG += `<line x1="70" y1="78" x2="70" y2="84" stroke="#2d3748" stroke-width="1.5"/>`;
+  }
+
+  /* NOSE */
+  let noseSVG = '';
+  if (noseType === 'hooked') noseSVG = `<path d="M 70 58 Q 66 66 68 70 Q 72 72 76 68 Q 72 64 72 58" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else if (noseType === 'long') noseSVG = `<path d="M 70 56 L 70 72 Q 73 73 74 70" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else if (noseType === 'short') noseSVG = `<path d="M 70 62 L 70 68 Q 72 69 73 67" stroke="#2d3748" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  else if (noseType === 'turned-up' || noseType === 'snub') noseSVG = `<path d="M 70 58 Q 68 66 74 68 Q 76 68 76 66" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else if (noseType === 'wide') noseSVG = `<path d="M 66 62 Q 70 68 74 62" stroke="#2d3748" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  else if (noseType === 'narrow') noseSVG = `<path d="M 70 58 L 70 68" stroke="#2d3748" stroke-width="1.5" fill="none" stroke-linecap="round"/>`;
+  else if (noseType === 'button') noseSVG = `<circle cx="70" cy="66" r="3" fill="none" stroke="#2d3748" stroke-width="1.8"/>`;
+  else if (noseType === 'flat') noseSVG = `<path d="M 66 64 Q 70 67 74 64" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else if (noseType === 'pointed') noseSVG = `<path d="M 70 58 L 70 70 L 72 72" stroke="#2d3748" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  else noseSVG = `<path d="M 70 60 Q 68 68 72 68" stroke="#2d3748" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+
+  /* MOUTH */
+  let mouthSVG = '';
+  if (mouthType === 'big') mouthSVG = `<ellipse cx="70" cy="82" rx="14" ry="6" fill="#B87333" opacity="0.3"/>`;
+  else if (mouthType === 'small') mouthSVG = `<ellipse cx="70" cy="82" rx="6" ry="3" fill="#B87333" opacity="0.3"/>`;
+  else if (mouthType === 'wide') mouthSVG = `<ellipse cx="70" cy="82" rx="16" ry="4" fill="#B87333" opacity="0.3"/>`;
+  else if (mouthType === 'full lips') mouthSVG = `<ellipse cx="70" cy="82" rx="11" ry="7" fill="#E08080" opacity="0.4"/>`;
+  else if (mouthType === 'thin lips') mouthSVG = `<ellipse cx="70" cy="82" rx="11" ry="2" fill="#E08080" opacity="0.4"/>`;
+  else if (mouthType === 'rosy lips') mouthSVG = `<ellipse cx="70" cy="82" rx="10" ry="5" fill="#FF6B9D" opacity="0.5"/>`;
+
+  /* EYEBROWS */
+  let eyebrowSVG = '';
+  if (eyebrowType === 'thick' || eyebrowType === 'bushy') {
+    eyebrowSVG = `
+      <path d="M 50 43 L 66 43" stroke="#2d3748" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 74 43 L 90 43" stroke="#2d3748" stroke-width="3.5" stroke-linecap="round"/>
+    `;
+  } else if (eyebrowType === 'arched') {
+    eyebrowSVG = `
+      <path d="M 50 45 Q 58 39 66 45" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M 74 45 Q 82 39 90 45" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>
+    `;
+  } else if (eyebrowType === 'thin') {
+    eyebrowSVG = `
+      <path d="M 51 44 Q 58 42 65 44" stroke="#2d3748" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <path d="M 75 44 Q 82 42 89 44" stroke="#2d3748" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    `;
+  } else if (eyebrowType === 'dark') {
+    eyebrowSVG = `
+      <path d="M 50 44 Q 58 41 66 44" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M 74 44 Q 82 41 90 44" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    `;
+  } else if (eyebrowType === 'light') {
+    eyebrowSVG = `
+      <path d="M 50 44 Q 58 41 66 44" stroke="#C68B5C" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M 74 44 Q 82 41 90 44" stroke="#C68B5C" stroke-width="2" fill="none" stroke-linecap="round"/>
+    `;
+  } else if (eyebrowType === 'straight') {
+    eyebrowSVG = `
+      <line x1="51" y1="44" x2="65" y2="44" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+      <line x1="75" y1="44" x2="89" y2="44" stroke="#2d3748" stroke-width="2" stroke-linecap="round"/>
+    `;
+  } else {
+    eyebrowSVG = `
+      <path d="M 51 44 Q 58 41 65 44" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M 75 44 Q 82 41 89 44" stroke="#2d3748" stroke-width="2" fill="none" stroke-linecap="round"/>
+    `;
+  }
+
+  /* EYES */
+  let eyeRadius = 4.5;
+  if (eyeSize === 'big') eyeRadius = 5.5;
+  if (eyeSize === 'small') eyeRadius = 3.5;
+
+  const eyeY = eyeShape === 'deep-set' ? 57 : (eyeShape === 'close-set' ? 55 : 55);
+  const eyeX1 = eyeShape === 'close-set' ? 62 : (eyeShape === 'wide-set' ? 54 : 58);
+  const eyeX2 = eyeShape === 'close-set' ? 78 : (eyeShape === 'wide-set' ? 86 : 82);
+
+  let eyeShapeSVG = '';
+  if (eyeShape === 'almond-shaped') {
+    eyeShapeSVG = `
+      <ellipse cx="${eyeX1}" cy="${eyeY}" rx="${eyeRadius + 1}" ry="${eyeRadius - 0.5}" fill="${eyeColor}"/>
+      <ellipse cx="${eyeX2}" cy="${eyeY}" rx="${eyeRadius + 1}" ry="${eyeRadius - 0.5}" fill="${eyeColor}"/>
+    `;
+  } else if (eyeShape === 'narrow') {
+    eyeShapeSVG = `
+      <ellipse cx="${eyeX1}" cy="${eyeY}" rx="${eyeRadius + 1}" ry="${eyeRadius - 1.5}" fill="${eyeColor}"/>
+      <ellipse cx="${eyeX2}" cy="${eyeY}" rx="${eyeRadius + 1}" ry="${eyeRadius - 1.5}" fill="${eyeColor}"/>
+    `;
+  } else {
+    eyeShapeSVG = `
+      <circle cx="${eyeX1}" cy="${eyeY}" r="${eyeRadius}" fill="${eyeColor}"/>
+      <circle cx="${eyeX2}" cy="${eyeY}" r="${eyeRadius}" fill="${eyeColor}"/>
+    `;
+  }
+
+  const pupilsSVG = `
+    <circle cx="${eyeX1}" cy="${eyeY}" r="2.2" fill="#2d3748"/>
+    <circle cx="${eyeX2}" cy="${eyeY}" r="2.2" fill="#2d3748"/>
+    <circle cx="${eyeX1 + 1}" cy="${eyeY - 1}" r="0.9" fill="white"/>
+    <circle cx="${eyeX2 + 1}" cy="${eyeY - 1}" r="0.9" fill="white"/>
+  `;
+
+  /* EYELASHES */
+  let eyelashSVG = '';
+  if (eyelashType === 'long' || eyelashType === 'thick' || eyelashType === 'curly') {
+    const len = eyelashType === 'long' ? 4 : (eyelashType === 'curly' ? 5 : 2.5);
+    eyelashSVG = `
+      <line x1="${eyeX1 - 6}" y1="${eyeY - 5}" x2="${eyeX1 - 8}" y2="${eyeY - 5 - len}" stroke="#2d3748" stroke-width="1.2"/>
+      <line x1="${eyeX1 - 2}" y1="${eyeY - 6}" x2="${eyeX1 - 3}" y2="${eyeY - 6 - len}" stroke="#2d3748" stroke-width="1.2"/>
+      <line x1="${eyeX1 + 2}" y1="${eyeY - 6}" x2="${eyeX1 + 2}" y2="${eyeY - 6 - len}" stroke="#2d3748" stroke-width="1.2"/>
+      <line x1="${eyeX1 + 6}" y1="${eyeY - 5}" x2="${eyeX1 + 7}" y2="${eyeY - 5 - len}" stroke="#2d3748" stroke-width="1.2"/>
+      <line x1="${eyeX2 - 6}" y1="${eyeY - 5}" x2="${eyeX2 - 7}" y2="${eyeY - 5 - len}" stroke="#2d3748" stroke-width="1.2"/>
+      <line x1="${eyeX2 - 2}" y1="${eyeY - 6}" x2="${eyeX2 - 2}" y2="${eyeY - 6 - len}" stroke="#2d3748" stroke-width="1.2"/>
+      <line x1="${eyeX2 + 2}" y1="${eyeY - 6}" x2="${eyeX2 + 3}" y2="${eyeY - 6 - len}" stroke="#2d3748" stroke-width="1.2"/>
+      <line x1="${eyeX2 + 6}" y1="${eyeY - 5}" x2="${eyeX2 + 8}" y2="${eyeY - 5 - len}" stroke="#2d3748" stroke-width="1.2"/>
+    `;
+  }
+
+  /* CHEEKS */
+  let cheekSVG = '';
+  if (cheekType === 'rosy') {
+    cheekSVG = `<circle cx="52" cy="70" r="6" fill="#FF9CB8" opacity="0.6"/><circle cx="88" cy="70" r="6" fill="#FF9CB8" opacity="0.6"/>`;
+  } else if (cheekType === 'pale') {
+    cheekSVG = `<circle cx="52" cy="70" r="5" fill="#FFFFFF" opacity="0.5"/><circle cx="88" cy="70" r="5" fill="#FFFFFF" opacity="0.5"/>`;
+  } else if (cheekType === 'chubby') {
+    cheekSVG = `<circle cx="48" cy="72" r="9" fill="${skinColor}" stroke="#2d3748" stroke-width="1" opacity="0.7"/><circle cx="92" cy="72" r="9" fill="${skinColor}" stroke="#2d3748" stroke-width="1" opacity="0.7"/>`;
+  } else if (cheekType === 'hollow') {
+    cheekSVG = `<path d="M 46 68 Q 50 72 46 76" stroke="#8B6F4A" stroke-width="1.5" fill="none"/><path d="M 94 68 Q 90 72 94 76" stroke="#8B6F4A" stroke-width="1.5" fill="none"/>`;
+  }
+
+  /* CHIN */
+  let chinSVG = '';
+  if (chinType === 'pointed') chinSVG = `<path d="M 64 88 Q 70 96 76 88" stroke="#2d3748" stroke-width="1.8" fill="none"/>`;
+  else if (chinType === 'square') chinSVG = `<line x1="62" y1="88" x2="78" y2="88" stroke="#2d3748" stroke-width="2"/>`;
+  else if (chinType === 'double') chinSVG = `<path d="M 58 88 Q 70 96 82 88" stroke="#2d3748" stroke-width="1.5" fill="none" opacity="0.7"/>`;
+  else if (chinType === 'strong') chinSVG = `<path d="M 62 86 Q 70 92 78 86" stroke="#2d3748" stroke-width="1.8" fill="none"/>`;
+
+  /* CLOTHES */
+  const isDress = dressColor !== null;
+  let bodySVG = '';
+  const bx = 70 - torsoWidth/2;
+  const by = 103;
+  const bh = 72;
+
+  if (isDress) {
+    bodySVG = `
+      <path d="M ${bx} ${by} L ${bx + torsoWidth} ${by} L ${bx + torsoWidth + 10} ${by + bh} L ${bx - 10} ${by + bh} Z" fill="${dressColor}" stroke="#2d3748" stroke-width="3"/>
+      <rect x="${bx - 2}" y="${by + 30}" width="${torsoWidth + 4}" height="6" fill="rgba(0,0,0,0.15)"/>
+    `;
+  } else if (clothesType === 'jacket' && jacketColor) {
+    bodySVG = `
+      <rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh}" rx="8" fill="${jacketColor}" stroke="#2d3748" stroke-width="3"/>
+      <line x1="70" y1="${by + 4}" x2="70" y2="${by + bh - 4}" stroke="#2d3748" stroke-width="2"/>
+      <rect x="${bx + 6}" y="${by + 45}" width="10" height="12" rx="2" fill="none" stroke="#2d3748" stroke-width="1.5"/>
+      <rect x="${bx + torsoWidth - 16}" y="${by + 45}" width="10" height="12" rx="2" fill="none" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  } else if (clothesType === 'coat' && coatColor) {
+    bodySVG = `
+      <rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh + 15}" rx="8" fill="${coatColor}" stroke="#2d3748" stroke-width="3"/>
+      <circle cx="70" cy="${by + 20}" r="2" fill="#2d3748"/>
+      <circle cx="70" cy="${by + 35}" r="2" fill="#2d3748"/>
+      <circle cx="70" cy="${by + 50}" r="2" fill="#2d3748"/>
+      <path d="M ${bx + 8} ${by} L 70 ${by + 12} L ${bx + torsoWidth - 8} ${by}" fill="none" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else if (clothesType === 'suit') {
+    bodySVG = `
+      <rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh}" rx="6" fill="${bodyColor}" stroke="#2d3748" stroke-width="3"/>
+      <polygon points="70,${by} 62,${by+8} 70,${by+22} 78,${by+8}" fill="#ffffff" stroke="#2d3748" stroke-width="1.5"/>
+      <polygon points="70,${by+10} 68,${by+16} 70,${by+30} 72,${by+16}" fill="#FF5C7A" stroke="#2d3748" stroke-width="1"/>
+      <path d="M ${bx + 4} ${by} L 70 ${by + 22} M ${bx + torsoWidth - 4} ${by} L 70 ${by + 22}" stroke="#2d3748" stroke-width="2" fill="none"/>
+    `;
+  } else if (clothesType === 'hoodie' && hoodieColor) {
+    bodySVG = `
+      <rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh}" rx="8" fill="${hoodieColor}" stroke="#2d3748" stroke-width="3"/>
+      <path d="M ${bx + 6} ${by} Q 70 ${by - 18} ${bx + torsoWidth - 6} ${by}" fill="${hoodieColor}" stroke="#2d3748" stroke-width="2"/>
+      <rect x="${bx + 10}" y="${by + 40}" width="${torsoWidth - 20}" height="18" rx="4" fill="none" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  } else if (clothesType === 'sweater' && sweaterColor) {
+    bodySVG = `
+      <rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh}" rx="8" fill="${sweaterColor}" stroke="#2d3748" stroke-width="3"/>
+      <line x1="${bx + 4}" y1="${by + 20}" x2="${bx + torsoWidth - 4}" y2="${by + 20}" stroke="rgba(0,0,0,0.15)" stroke-width="4"/>
+      <line x1="${bx + 4}" y1="${by + 40}" x2="${bx + torsoWidth - 4}" y2="${by + 40}" stroke="rgba(0,0,0,0.15)" stroke-width="4"/>
+    `;
+  } else if (clothesType === 'shirt') {
+    bodySVG = `
+      <rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh}" rx="6" fill="${bodyColor}" stroke="#2d3748" stroke-width="3"/>
+      <polygon points="62,${by} 70,${by+10} 78,${by}" fill="#fff" stroke="#2d3748" stroke-width="1.5"/>
+      <circle cx="70" cy="${by + 22}" r="1.8" fill="#2d3748"/>
+      <circle cx="70" cy="${by + 38}" r="1.8" fill="#2d3748"/>
+      <circle cx="70" cy="${by + 54}" r="1.8" fill="#2d3748"/>
+    `;
+  } else if (clothesType === 'tshirt') {
+    bodySVG = `
+      <rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh}" rx="8" fill="${bodyColor}" stroke="#2d3748" stroke-width="3"/>
+      <path d="M ${bx + 2} ${by + 10} L ${bx + 10} ${by + 30}" stroke="#2d3748" stroke-width="1.5" fill="none"/>
+      <path d="M ${bx + torsoWidth - 2} ${by + 10} L ${bx + torsoWidth - 10} ${by + 30}" stroke="#2d3748" stroke-width="1.5" fill="none"/>
+    `;
+  } else {
+    bodySVG = `<rect x="${bx}" y="${by}" width="${torsoWidth}" height="${bh}" rx="8" fill="${bodyColor}" stroke="#2d3748" stroke-width="3"/>`;
+  }
+
+  /* JEANS / TROUSERS - denim detail */
+  let lowerSVG = '';
+  const legY = 175;
+
+  if (isDress) {
+    lowerSVG = `
+      <rect x="54" y="${legY}" width="14" height="55" rx="4" fill="${skinColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="72" y="${legY}" width="14" height="55" rx="4" fill="${skinColor}" stroke="#2d3748" stroke-width="2.5"/>
+    `;
+  } else if (clothesType === 'skirt' && skirtColor) {
+    lowerSVG = `
+      <path d="M ${bx - 4} 175 L ${bx + torsoWidth + 4} 175 L ${bx + torsoWidth + 12} 210 L ${bx - 12} 210 Z" fill="${skirtColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="56" y="210" width="12" height="25" rx="3" fill="${skinColor}" stroke="#2d3748" stroke-width="2"/>
+      <rect x="72" y="210" width="12" height="25" rx="3" fill="${skinColor}" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else if (clothesType === 'shorts' && shortsColor) {
+    lowerSVG = `
+      <rect x="${bx}" y="175" width="${torsoWidth / 2 - 1}" height="35" rx="5" fill="${shortsColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="${bx + torsoWidth / 2 + 1}" y="175" width="${torsoWidth / 2 - 1}" height="35" rx="5" fill="${shortsColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="${bx + 4}" y="210" width="${torsoWidth / 2 - 8}" height="25" rx="3" fill="${skinColor}" stroke="#2d3748" stroke-width="2"/>
+      <rect x="${bx + torsoWidth / 2 + 4}" y="210" width="${torsoWidth / 2 - 8}" height="25" rx="3" fill="${skinColor}" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else if (clothesType === 'jeans') {
+    lowerSVG = `
+      <rect x="${legX1}" y="175" width="${legWidth}" height="60" rx="5" fill="#3A5A8C" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="${legX2}" y="175" width="${legWidth}" height="60" rx="5" fill="#3A5A8C" stroke="#2d3748" stroke-width="2.5"/>
+      <line x1="${legX1 + 4}" y1="180" x2="${legX1 + 4}" y2="230" stroke="#FFE066" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="${legX2 + 4}" y1="180" x2="${legX2 + 4}" y2="230" stroke="#FFE066" stroke-width="1" stroke-dasharray="3,3"/>
+    `;
+  } else {
+    lowerSVG = `
+      <rect x="${legX1}" y="175" width="${legWidth}" height="60" rx="5" fill="${pantsColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="${legX2}" y="175" width="${legWidth}" height="60" rx="5" fill="${pantsColor}" stroke="#2d3748" stroke-width="2.5"/>
+    `;
+  }
+
+  const armsSVG = `
+    <rect x="${armX}" y="105" width="${armWidth}" height="60" rx="7" fill="${skinColor}" stroke="#2d3748" stroke-width="2.5"/>
+    <rect x="${140 - armX - armWidth}" y="105" width="${armWidth}" height="60" rx="7" fill="${skinColor}" stroke="#2d3748" stroke-width="2.5"/>
+  `;
+
+  /* SHOES */
+  let shoesSVG = '';
+  if (shoesType === 'boots') {
+    shoesSVG = `
+      <rect x="${legX1 - 3}" y="230" width="${legWidth + 6}" height="22" rx="4" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="${legX2 - 3}" y="230" width="${legWidth + 6}" height="22" rx="4" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <ellipse cx="${legX1 + legWidth/2}" cy="252" rx="${legWidth/2 + 5}" ry="5" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <ellipse cx="${legX2 + legWidth/2}" cy="252" rx="${legWidth/2 + 5}" ry="5" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+    `;
+  } else if (shoesType === 'heels') {
+    shoesSVG = `
+      <ellipse cx="${legX1 + legWidth/2}" cy="245" rx="${legWidth/2 + 4}" ry="6" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <ellipse cx="${legX2 + legWidth/2}" cy="245" rx="${legWidth/2 + 4}" ry="6" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <rect x="${legX1 + legWidth/2 - 2}" y="248" width="4" height="12" fill="${shoeColor}" stroke="#2d3748" stroke-width="1.5"/>
+      <rect x="${legX2 + legWidth/2 - 2}" y="248" width="4" height="12" fill="${shoeColor}" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  } else if (shoesType === 'sandals') {
+    shoesSVG = `
+      <ellipse cx="${legX1 + legWidth/2}" cy="248" rx="${legWidth/2 + 3}" ry="5" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <ellipse cx="${legX2 + legWidth/2}" cy="248" rx="${legWidth/2 + 3}" ry="5" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <path d="M ${legX1 + 4} 240 L ${legX1 + legWidth - 4} 240" stroke="#2d3748" stroke-width="2"/>
+      <path d="M ${legX2 + 4} 240 L ${legX2 + legWidth - 4} 240" stroke="#2d3748" stroke-width="2"/>
+    `;
+  } else if (shoesType === 'flip-flops') {
+    shoesSVG = `
+      <ellipse cx="${legX1 + legWidth/2}" cy="248" rx="${legWidth/2 + 3}" ry="4" fill="${shoeColor}" stroke="#2d3748" stroke-width="2"/>
+      <ellipse cx="${legX2 + legWidth/2}" cy="248" rx="${legWidth/2 + 3}" ry="4" fill="${shoeColor}" stroke="#2d3748" stroke-width="2"/>
+      <line x1="${legX1 + legWidth/2}" y1="242" x2="${legX1 + 4}" y2="248" stroke="#2d3748" stroke-width="1.8"/>
+      <line x1="${legX1 + legWidth/2}" y1="242" x2="${legX1 + legWidth - 4}" y2="248" stroke="#2d3748" stroke-width="1.8"/>
+      <line x1="${legX2 + legWidth/2}" y1="242" x2="${legX2 + 4}" y2="248" stroke="#2d3748" stroke-width="1.8"/>
+      <line x1="${legX2 + legWidth/2}" y1="242" x2="${legX2 + legWidth - 4}" y2="248" stroke="#2d3748" stroke-width="1.8"/>
+    `;
+  } else if (shoesType === 'loafers') {
+    shoesSVG = `
+      <ellipse cx="${legX1 + legWidth/2}" cy="246" rx="${legWidth/2 + 5}" ry="7" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <ellipse cx="${legX2 + legWidth/2}" cy="246" rx="${legWidth/2 + 5}" ry="7" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <path d="M ${legX1 + 4} 243 L ${legX1 + legWidth - 4} 243" stroke="#2d3748" stroke-width="1.5"/>
+      <path d="M ${legX2 + 4} 243 L ${legX2 + legWidth - 4} 243" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  } else {
+    shoesSVG = `
+      <ellipse cx="${legX1 + legWidth/2}" cy="245" rx="${legWidth/2 + 4}" ry="7" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+      <ellipse cx="${legX2 + legWidth/2}" cy="245" rx="${legWidth/2 + 4}" ry="7" fill="${shoeColor}" stroke="#2d3748" stroke-width="2.5"/>
+    `;
+  }
+
+  const neckSVG = `<rect x="63" y="88" width="14" height="18" fill="${skinColor}" stroke="#2d3748" stroke-width="2"/>`;
+
+  /* ACCESSORIES */
+  let accessoriesSVG = '';
+  if (earrings) {
+    accessoriesSVG += `
+      <circle cx="37" cy="58" r="3" fill="#FFD700" stroke="#8B6914" stroke-width="0.5"/>
+      <circle cx="103" cy="58" r="3" fill="#FFD700" stroke="#8B6914" stroke-width="0.5"/>
+    `;
+  }
+  if (necklace) {
+    accessoriesSVG += `
+      <path d="M 60 100 Q 70 110 80 100" stroke="#FFD700" stroke-width="2" fill="none"/>
+      <circle cx="70" cy="109" r="2.5" fill="#FFD700"/>
+    `;
+  }
+  if (watch) {
+    accessoriesSVG += `
+      <rect x="${armX - 1}" y="148" width="${armWidth + 2}" height="9" rx="2" fill="#2d3748"/>
+      <rect x="${armX + 1}" y="150" width="${armWidth - 2}" height="5" fill="#fff"/>
+    `;
+  }
+  if (ring) {
+    accessoriesSVG += `<circle cx="${armX + 2}" cy="162" r="2.5" fill="none" stroke="#FFD700" stroke-width="1.8"/>`;
+  }
+  if (bracelet) {
+    accessoriesSVG += `<path d="M ${armX} 152 Q ${armX + armWidth/2} 156 ${armX + armWidth} 152" stroke="#FFD700" stroke-width="2.5" fill="none"/>`;
+  }
+  if (bag) {
+    accessoriesSVG += `
+      <rect x="${armX + armWidth + 1}" y="135" width="18" height="20" rx="3" fill="#FF5C7A" stroke="#2d3748" stroke-width="2"/>
+      <path d="M ${armX + armWidth + 3} 135 Q ${armX + armWidth + 10} 128 ${armX + armWidth + 17} 135" stroke="#2d3748" stroke-width="2" fill="none"/>
+    `;
+  }
+  if (hat) {
+    accessoriesSVG += `
+      <ellipse cx="70" cy="22" rx="40" ry="8" fill="#2d3748"/>
+      <path d="M 45 22 L 48 -8 L 92 -8 L 95 22 Z" fill="#2d3748" stroke="#1a1a1a" stroke-width="1"/>
+      <rect x="46" y="8" width="48" height="7" fill="#FF6B9D"/>
+    `;
+  }
+  if (cap) {
+    accessoriesSVG += `
+      <path d="M 38 22 Q 70 -10 102 22 L 102 28 L 38 28 Z" fill="#4A90E2" stroke="#2d3748" stroke-width="1.5"/>
+      <path d="M 30 22 Q 45 32 58 26" fill="#4A90E2" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  }
+  if (scarf) {
+    accessoriesSVG += `
+      <rect x="${bx + 8}" y="98" width="${torsoWidth - 16}" height="12" rx="3" fill="#FF5C7A" stroke="#2d3748" stroke-width="1.5"/>
+      <rect x="${bx + torsoWidth - 12}" y="105" width="8" height="30" rx="2" fill="#FF5C7A" stroke="#2d3748" stroke-width="1.5"/>
+    `;
+  }
+
+  return `<svg width="${width}" height="${height}" viewBox="0 0 140 260" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+    <g transform="translate(70, 130) scale(1, ${scaleY}) translate(-70, -130)">
+      ${hairBack}
+      ${neckSVG}
+      ${bodySVG}
+      ${armsSVG}
+      ${lowerSVG}
+      ${shoesSVG}
+      <ellipse cx="70" cy="55" rx="${faceRx}" ry="${faceRy}" fill="${skinColor}" stroke="#2d3748" stroke-width="2.5"/>
+      ${foreheadSVG}
+      ${cheekSVG}
+      ${chinSVG}
+      ${hairFront}
+      ${eyeShapeSVG}
+      ${pupilsSVG}
+      ${eyelashSVG}
+      ${eyebrowSVG}
+      ${noseSVG}
+      ${mouthSVG}
+      ${smileSVG}
+      ${frecklesSVG}
+      ${dimplesSVG}
+      ${marksSVG}
+      ${beardSVG}
+      ${glassesSVG}
+      ${wrinklesSVG}
+      ${accessoriesSVG}
+    </g>
+  </svg>`;
+}
+
+/* ============================================================
+   CHARACTERS (20 персонажей)
+============================================================ */
+const characters = [
+  { id: 1, name: 'Tom', svg: { hairColor: 'dark', hairType: 'short', hairLength: 'short', eyeColor: '#4A90E2', eyeShape: 'round', eyeSize: 'medium', skinColor: '#FFD9B3', shirtColor: '#4A90E2', pantsColor: '#2E5AAC', shoeColor: '#ffffff', glasses: true, beard: true, smileType: 'friendly', heightType: 'tall', age: 'young', buildType: 'slim', noseType: 'straight', eyebrowType: 'thick', clothesType: 'tshirt', shoesType: 'sneakers' }, traits: { height: 'tall', build: 'slim', hair: 'short', hairColor: 'dark', eyes: 'blue', glasses: true, beard: true, smile: 'friendly', nose: 'straight' }, fullDesc: 'tall, slim, short dark hair, blue eyes, glasses, beard, friendly smile, straight nose, blue T-shirt' },
+  { id: 2, name: 'Anna', svg: { hairColor: 'blond', hairType: 'wavy', hairLength: 'long', eyeColor: '#4DD4AC', eyeShape: 'almond-shaped', eyeSize: 'big', skinColor: '#FFE0CC', dressColor: '#FF5C7A', shoeColor: '#D94070', freckles: true, smileType: 'bright', gender: 'f', heightType: 'medium height', age: 'young', buildType: 'slim', noseType: 'turned-up', eyebrowType: 'arched', cheekType: 'rosy', earrings: true, necklace: true, clothesType: 'dress', shoesType: 'heels' }, traits: { height: 'medium', build: 'slim', hair: 'long', hairColor: 'blond', eyes: 'green', glasses: false, beard: false, smile: 'bright', nose: 'turned-up' }, fullDesc: 'medium height, slim, long wavy blond hair, green almond-shaped eyes, freckles, bright smile, turned-up nose, rosy cheeks, earrings, necklace, red dress' },
+  { id: 3, name: 'Max', svg: { hairColor: 'red', hairType: 'short', hairLength: 'short', eyeColor: '#6B4423', eyeShape: 'round', eyeSize: 'small', skinColor: '#E8B98A', shirtColor: '#4DD4AC', pantsColor: '#2d3748', shoeColor: '#2d3748', beard: true, smileType: 'shy', heightType: 'short', age: 'young', buildType: 'stocky', noseType: 'hooked', eyebrowType: 'bushy', teeth: 'gap', clothesType: 'tshirt', shoesType: 'boots' }, traits: { height: 'short', build: 'stocky', hair: 'short', hairColor: 'red', eyes: 'brown', glasses: false, beard: true, smile: 'shy', nose: 'hooked' }, fullDesc: 'short, stocky, short red hair, brown eyes, beard, shy smile, hooked nose, bushy eyebrows, gap between teeth, boots' },
+  { id: 4, name: 'Lily', svg: { hairColor: 'dark', hairType: 'straight', hairLength: 'long', eyeColor: '#6B4423', eyeShape: 'almond-shaped', eyeSize: 'big', skinColor: '#D9A77A', dressColor: '#FFE066', shoeColor: '#FF6B9D', smileType: 'friendly', gender: 'f', heightType: 'short', age: 'young', buildType: 'petite', noseType: 'button', eyebrowType: 'thin', dimples: true, cheekType: 'rosy', clothesType: 'dress', shoesType: 'heels' }, traits: { height: 'short', build: 'petite', hair: 'long', hairColor: 'dark', eyes: 'brown', glasses: false, beard: false, smile: 'friendly', nose: 'button' }, fullDesc: 'short, petite, long dark hair, brown almond-shaped eyes, friendly smile, button nose, thin eyebrows, dimples, rosy cheeks, yellow dress' },
+  { id: 5, name: 'John', svg: { hairColor: 'grey', hairType: 'short', hairLength: 'short', eyeColor: '#4A90E2', eyeShape: 'round', eyeSize: 'medium', skinColor: '#F5D7B3', shirtColor: '#6B4423', pantsColor: '#3D2817', shoeColor: '#6B4423', glasses: true, beard: true, smileType: 'kind', heightType: 'medium height', age: 'elderly', buildType: 'medium', noseType: 'long', eyebrowType: 'thick', cheekType: 'hollow', clothesType: 'coat', coatColor: '#6B4423', shoesType: 'boots' }, traits: { height: 'medium', build: 'medium', hair: 'short', hairColor: 'grey', eyes: 'blue', glasses: true, beard: true, smile: 'kind', nose: 'long' }, fullDesc: 'medium height, short grey hair, blue eyes, glasses, beard, kind smile, long nose, hollow cheeks, wrinkles, brown coat, boots' },
+  { id: 6, name: 'Emma', svg: { hairColor: 'blond', hairType: 'straight', hairLength: 'long', eyeColor: '#4A90E2', eyeShape: 'round', eyeSize: 'big', skinColor: '#FFE0CC', shirtColor: '#FF6B9D', pantsColor: '#4A90E2', shoeColor: '#ffffff', smileType: 'bright', gender: 'f', heightType: 'tall', age: 'young', buildType: 'slim', noseType: 'straight', eyebrowType: 'arched', earrings: true, bracelet: true, clothesType: 'sweater', sweaterColor: '#FF6B9D', shoesType: 'sneakers' }, traits: { height: 'tall', build: 'slim', hair: 'long', hairColor: 'blond', eyes: 'blue', glasses: false, beard: false, smile: 'bright', nose: 'straight' }, fullDesc: 'tall, slim, long straight blond hair, blue eyes, bright smile, straight nose, arched eyebrows, earrings, bracelet, pink sweater' },
+  { id: 7, name: 'Nick', svg: { hairColor: 'dark', hairType: 'short', hairLength: 'short', eyeColor: '#4DD4AC', eyeShape: 'round', eyeSize: 'medium', skinColor: '#E8B98A', shirtColor: '#FFB84D', pantsColor: '#2E5AAC', shoeColor: '#FF6B9D', smileType: 'friendly', heightType: 'short', age: 'young', buildType: 'athletic', noseType: 'flat', eyebrowType: 'straight', cap: true, clothesType: 'hoodie', hoodieColor: '#FFB84D', shoesType: 'sneakers' }, traits: { height: 'short', build: 'athletic', hair: 'short', hairColor: 'dark', eyes: 'green', glasses: false, beard: false, smile: 'friendly', nose: 'flat' }, fullDesc: 'short, athletic, short dark hair, green eyes, friendly smile, flat nose, straight eyebrows, orange hoodie, cap, sneakers' },
+  { id: 8, name: 'Mary', svg: { hairColor: 'grey', hairType: 'wavy', hairLength: 'short', eyeColor: '#4DD4AC', eyeShape: 'almond-shaped', eyeSize: 'medium', skinColor: '#F5D7B3', dressColor: '#A375FF', shoeColor: '#D94070', glasses: true, smileType: 'kind', gender: 'f', heightType: 'medium height', age: 'elderly', buildType: 'medium', noseType: 'snub', eyebrowType: 'thin', cheekType: 'pale', necklace: true, scarf: true, clothesType: 'dress', shoesType: 'heels' }, traits: { height: 'medium', build: 'medium', hair: 'short', hairColor: 'grey', eyes: 'green', glasses: true, beard: false, smile: 'kind', nose: 'snub' }, fullDesc: 'medium height, short grey hair, green eyes, glasses, kind smile, snub nose, thin eyebrows, pale cheeks, purple dress, necklace, scarf' },
+  { id: 9, name: 'Oliver', svg: { hairColor: 'brown', hairType: 'curly', hairLength: 'short', eyeColor: '#6B4423', eyeShape: 'round', eyeSize: 'big', skinColor: '#C68B5C', shirtColor: '#4DD4AC', pantsColor: '#2d3748', shoeColor: '#ffffff', smileType: 'bright', heightType: 'tall', age: 'young', buildType: 'muscular', noseType: 'wide', eyebrowType: 'thick', teeth: 'braces', freckles: true, clothesType: 'tshirt', shoesType: 'sneakers' }, traits: { height: 'tall', build: 'muscular', hair: 'short', hairColor: 'brown', eyes: 'brown', glasses: false, beard: false, smile: 'bright', nose: 'wide' }, fullDesc: 'tall, muscular, curly brown hair, brown eyes, bright smile, wide nose, thick eyebrows, braces, freckles, green T-shirt, sneakers' },
+  { id: 10, name: 'Sophie', svg: { hairColor: 'red', hairType: 'wavy', hairLength: 'long', eyeColor: '#4DD4AC', eyeShape: 'almond-shaped', eyeSize: 'big', skinColor: '#FFE0CC', dressColor: '#4DD4AC', shoeColor: '#FF6B9D', smileType: 'shy', gender: 'f', heightType: 'medium height', age: 'young', buildType: 'slim', noseType: 'pointed', eyebrowType: 'arched', dimples: true, earrings: true, clothesType: 'dress', shoesType: 'heels' }, traits: { height: 'medium', build: 'slim', hair: 'long', hairColor: 'red', eyes: 'green', glasses: false, beard: false, smile: 'shy', nose: 'pointed' }, fullDesc: 'medium height, slim, long wavy red hair, green eyes, shy smile, pointed nose, arched eyebrows, dimples, earrings, green dress' },
+  { id: 11, name: 'David', svg: { hairColor: 'black', hairType: 'short', hairLength: 'short', eyeColor: '#4A90E2', eyeShape: 'narrow', eyeSize: 'small', skinColor: '#D9A77A', shirtColor: '#2d3748', pantsColor: '#1a1a1a', shoeColor: '#2d3748', beard: true, moustache: true, smileType: 'serious', heightType: 'tall', age: 'middle-aged', buildType: 'broad-shouldered', noseType: 'hooked', eyebrowType: 'bushy', scar: true, watch: true, clothesType: 'suit', shoesType: 'boots' }, traits: { height: 'tall', build: 'broad-shouldered', hair: 'short', hairColor: 'black', eyes: 'blue', glasses: false, beard: true, smile: 'serious', nose: 'hooked' }, fullDesc: 'tall, broad-shouldered, short black hair, blue narrow eyes, beard, moustache, serious smile, hooked nose, bushy eyebrows, scar, watch, black suit, boots' },
+  { id: 12, name: 'Chloe', svg: { hairColor: 'blond', hairType: 'straight', hairLength: 'shoulder-length', eyeColor: '#4DD4AC', eyeShape: 'round', eyeSize: 'big', skinColor: '#FFE0CC', dressColor: '#FFB84D', shoeColor: '#ffffff', smileType: 'bright', gender: 'f', heightType: 'short', age: 'young', buildType: 'petite', noseType: 'button', eyebrowType: 'thin', teeth: 'braces', freckles: true, earrings: true, necklace: true, bracelet: true, bag: true, clothesType: 'dress', shoesType: 'sneakers' }, traits: { height: 'short', build: 'petite', hair: 'shoulder-length', hairColor: 'blond', eyes: 'green', glasses: false, beard: false, smile: 'bright', nose: 'button' }, fullDesc: 'short, petite, shoulder-length straight blond hair, green eyes, bright smile, button nose, thin eyebrows, braces, freckles, earrings, necklace, bracelet, bag, orange dress' },
+  { id: 13, name: 'Kate', svg: { hairColor: 'black', hairType: 'curly', hairLength: 'long', eyeColor: '#6B4423', eyeShape: 'round', eyeSize: 'big', skinColor: '#8B5A3C', dressColor: '#FF6B9D', shoeColor: '#2d3748', smileType: 'bright', gender: 'f', heightType: 'medium height', age: 'young', buildType: 'athletic', noseType: 'wide', eyebrowType: 'thick', earrings: true, clothesType: 'dress', shoesType: 'boots' }, traits: { height: 'medium', build: 'athletic', hair: 'long', hairColor: 'black', eyes: 'brown', glasses: false, beard: false, smile: 'bright', nose: 'wide' }, fullDesc: 'medium height, athletic, long curly black hair, brown eyes, bright smile, wide nose, thick eyebrows, dark skin, earrings, pink dress, boots' },
+  { id: 14, name: 'Ben', svg: { hairColor: 'blond', hairType: 'short', hairLength: 'short', eyeColor: '#4A90E2', eyeShape: 'round', eyeSize: 'medium', skinColor: '#FFE0CC', shirtColor: '#A375FF', pantsColor: '#2d3748', shoeColor: '#ffffff', smileType: 'friendly', heightType: 'tall', age: 'young', buildType: 'athletic', noseType: 'straight', eyebrowType: 'normal', clothesType: 'sweater', sweaterColor: '#A375FF', shoesType: 'sneakers' }, traits: { height: 'tall', build: 'athletic', hair: 'short', hairColor: 'blond', eyes: 'blue', glasses: false, beard: false, smile: 'friendly', nose: 'straight' }, fullDesc: 'tall, athletic, short blond hair, blue eyes, friendly smile, straight nose, purple sweater, sneakers' },
+  { id: 15, name: 'Rose', svg: { hairColor: 'red', hairType: 'wavy', hairLength: 'shoulder-length', eyeColor: '#4DD4AC', eyeShape: 'almond-shaped', eyeSize: 'big', skinColor: '#FFE0CC', dressColor: '#FF5C7A', shoeColor: '#FF6B9D', smileType: 'bright', gender: 'f', heightType: 'medium height', age: 'young', buildType: 'slim', noseType: 'turned-up', eyebrowType: 'arched', freckles: true, cheekType: 'rosy', earrings: true, necklace: true, clothesType: 'dress', shoesType: 'heels' }, traits: { height: 'medium', build: 'slim', hair: 'shoulder-length', hairColor: 'red', eyes: 'green', glasses: false, beard: false, smile: 'bright', nose: 'turned-up' }, fullDesc: 'medium height, slim, shoulder-length wavy red hair, green eyes, bright smile, turned-up nose, arched eyebrows, freckles, rosy cheeks, earrings, necklace, red dress' },
+  { id: 16, name: 'Jack', svg: { hairColor: 'brown', hairType: 'short', hairLength: 'short', eyeColor: '#6B4423', eyeShape: 'round', eyeSize: 'medium', skinColor: '#C68B5C', shirtColor: '#2d3748', pantsColor: '#1a1a1a', shoeColor: '#2d3748', moustache: true, smileType: 'serious', heightType: 'tall', age: 'middle-aged', buildType: 'muscular', noseType: 'long', eyebrowType: 'thick', watch: true, clothesType: 'suit', shoesType: 'boots' }, traits: { height: 'tall', build: 'muscular', hair: 'short', hairColor: 'brown', eyes: 'brown', glasses: false, beard: false, smile: 'serious', nose: 'long' }, fullDesc: 'tall, muscular, short brown hair, brown eyes, moustache, serious smile, long nose, thick eyebrows, watch, black suit, boots' },
+  { id: 17, name: 'Mia', svg: { hairColor: 'dark', hairType: 'straight', hairLength: 'long', eyeColor: '#4A90E2', eyeShape: 'narrow', eyeSize: 'small', skinColor: '#FFE0CC', dressColor: '#4A90E2', shoeColor: '#2d3748', smileType: 'shy', gender: 'f', heightType: 'tall', age: 'young', buildType: 'slim', noseType: 'narrow', eyebrowType: 'thin', clothesType: 'dress', shoesType: 'heels' }, traits: { height: 'tall', build: 'slim', hair: 'long', hairColor: 'dark', eyes: 'blue', glasses: false, beard: false, smile: 'shy', nose: 'narrow' }, fullDesc: 'tall, slim, long straight dark hair, blue narrow eyes, shy smile, narrow nose, thin eyebrows, blue dress, heels' },
+  { id: 18, name: 'Adam', svg: { hairColor: 'blond', hairType: 'wavy', hairLength: 'short', eyeColor: '#4DD4AC', eyeShape: 'round', eyeSize: 'big', skinColor: '#FFE0CC', shirtColor: '#FFB84D', pantsColor: '#2E5AAC', shoeColor: '#2d3748', glasses: true, smileType: 'friendly', heightType: 'short', age: 'young', buildType: 'stocky', noseType: 'short', eyebrowType: 'thick', clothesType: 'shirt', shoesType: 'loafers' }, traits: { height: 'short', build: 'stocky', hair: 'short', hairColor: 'blond', eyes: 'green', glasses: true, beard: false, smile: 'friendly', nose: 'short' }, fullDesc: 'short, stocky, short wavy blond hair, green eyes, glasses, friendly smile, short nose, thick eyebrows, orange shirt, loafers' },
+  { id: 19, name: 'Zoe', svg: { hairColor: 'black', hairType: 'curly', hairLength: 'shoulder-length', eyeColor: '#6B4423', eyeShape: 'almond-shaped', eyeSize: 'big', skinColor: '#8B5A3C', dressColor: '#FFE066', shoeColor: '#FF6B9D', smileType: 'bright', gender: 'f', heightType: 'medium height', age: 'young', buildType: 'petite', noseType: 'button', eyebrowType: 'arched', freckles: true, earrings: true, necklace: true, clothesType: 'dress', shoesType: 'heels' }, traits: { height: 'medium', build: 'petite', hair: 'shoulder-length', hairColor: 'black', eyes: 'brown', glasses: false, beard: false, smile: 'bright', nose: 'button' }, fullDesc: 'medium height, petite, shoulder-length curly black hair, brown eyes, bright smile, button nose, arched eyebrows, freckles, dark skin, earrings, necklace, yellow dress' },
+  { id: 20, name: 'Leo', svg: { hairColor: 'black', hairType: 'buzz cut', hairLength: 'short', eyeColor: '#4A90E2', eyeShape: 'round', eyeSize: 'medium', skinColor: '#D9A77A', shirtColor: '#4DD4AC', pantsColor: '#2d3748', shoeColor: '#ffffff', beard: true, smileType: 'friendly', heightType: 'tall', age: 'middle-aged', buildType: 'muscular', noseType: 'straight', eyebrowType: 'straight', tattoo: true, clothesType: 'tshirt', shoesType: 'sneakers' }, traits: { height: 'tall', build: 'muscular', hair: 'short', hairColor: 'black', eyes: 'blue', glasses: false, beard: true, smile: 'friendly', nose: 'straight' }, fullDesc: 'tall, muscular, buzz cut black hair, blue eyes, beard, friendly smile, straight nose, straight eyebrows, tattoo, green T-shirt, sneakers' }
+];
+
+/* ============================================================
+   QUESTIONS (45+)
+============================================================ */
+const questions = [
+  { q: 'Is he/she tall?', key: 'height', val: 'tall' },
+  { q: 'Is he/she short?', key: 'height', val: 'short' },
+  { q: 'Is he/she medium height?', key: 'height', val: 'medium' },
+  { q: 'Is he/she slim?', key: 'build', val: 'slim' },
+  { q: 'Is he/she stocky?', key: 'build', val: 'stocky' },
+  { q: 'Is he/she muscular?', key: 'build', val: 'muscular' },
+  { q: 'Is he/she petite?', key: 'build', val: 'petite' },
+  { q: 'Is he/she athletic?', key: 'build', val: 'athletic' },
+  { q: 'Is he/she broad-shouldered?', key: 'build', val: 'broad-shouldered' },
+  { q: 'Does he/she have long hair?', key: 'hair', val: 'long' },
+  { q: 'Does he/she have short hair?', key: 'hair', val: 'short' },
+  { q: 'Does he/she have shoulder-length hair?', key: 'hair', val: 'shoulder-length' },
+  { q: 'Does he/she have dark hair?', key: 'hairColor', val: 'dark' },
+  { q: 'Does he/she have blond hair?', key: 'hairColor', val: 'blond' },
+  { q: 'Does he/she have red hair?', key: 'hairColor', val: 'red' },
+  { q: 'Does he/she have grey hair?', key: 'hairColor', val: 'grey' },
+  { q: 'Does he/she have black hair?', key: 'hairColor', val: 'black' },
+  { q: 'Does he/she have brown hair?', key: 'hairColor', val: 'brown' },
+  { q: 'Does he/she have blue eyes?', key: 'eyes', val: 'blue' },
+  { q: 'Does he/she have green eyes?', key: 'eyes', val: 'green' },
+  { q: 'Does he/she have brown eyes?', key: 'eyes', val: 'brown' },
+  { q: 'Does he/she wear glasses?', key: 'glasses', val: true },
+  { q: 'Does he/she have a beard?', key: 'beard', val: true },
+  { q: 'Does he/she have a friendly smile?', key: 'smile', val: 'friendly' },
+  { q: 'Does he/she have a bright smile?', key: 'smile', val: 'bright' },
+  { q: 'Does he/she have a shy smile?', key: 'smile', val: 'shy' },
+  { q: 'Does he/she have a serious smile?', key: 'smile', val: 'serious' },
+  { q: 'Does he/she have a straight nose?', key: 'nose', val: 'straight' },
+  { q: 'Does he/she have a hooked nose?', key: 'nose', val: 'hooked' },
+  { q: 'Does he/she have a turned-up nose?', key: 'nose', val: 'turned-up' },
+  { q: 'Does he/she have a button nose?', key: 'nose', val: 'button' },
+  { q: 'Does he/she have a wide nose?', key: 'nose', val: 'wide' },
+  { q: 'Does he/she have a long nose?', key: 'nose', val: 'long' },
+  { q: 'Does he/she have a flat nose?', key: 'nose', val: 'flat' },
+  { q: 'Does he/she have a pointed nose?', key: 'nose', val: 'pointed' },
+  { q: 'Is he/she a young person?', key: 'age', val: 'young' },
+  { q: 'Is he/she middle-aged?', key: 'age', val: 'middle-aged' },
+  { q: 'Is he/she elderly?', key: 'age', val: 'elderly' },
+  { q: 'Is he/she wearing a T-shirt?', key: 'clothes', val: 'tshirt' },
+  { q: 'Is he/she wearing a dress?', key: 'clothes', val: 'dress' },
+  { q: 'Is he/she wearing a suit?', key: 'clothes', val: 'suit' },
+  { q: 'Is he/she wearing a hoodie?', key: 'clothes', val: 'hoodie' },
+  { q: 'Is he/she wearing a sweater?', key: 'clothes', val: 'sweater' },
+  { q: 'Does he/she have earrings?', key: 'access', val: 'earrings' },
+  { q: 'Does he/she have a necklace?', key: 'access', val: 'necklace' },
+  { q: 'Does he/she have a watch?', key: 'access', val: 'watch' },
+  { q: 'Does he/she have a hat?', key: 'access', val: 'hat' },
+  { q: 'Does he/she have a cap?', key: 'access', val: 'cap' },
+  { q: 'Does he/she have a scarf?', key: 'access', val: 'scarf' }
+];
+
+/* ============================================================
+   GLOBAL
+============================================================ */
+let globalScore = 0, streak = 0;
+function addScore(n) {
+  globalScore += n;
+  if (n > 0) streak++; else streak = 0;
+  document.getElementById('globalScore').textContent = globalScore;
+  document.getElementById('streak').textContent = streak;
+}
+function confetti() {
+  const colors = ['#FF6B9D', '#FFB84D', '#4DD4AC', '#6BA3FF', '#A375FF', '#FFE066'];
+  for (let i = 0; i < 50; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.animationDelay = Math.random() * 0.5 + 's';
+    c.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3000);
+  }
+}
+function showModal(emoji, title, text) {
+  document.getElementById('modalEmoji').textContent = emoji;
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalText').textContent = text;
+  document.getElementById('modal').classList.add('active');
+  confetti();
+}
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+
+document.querySelectorAll('.menu-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.screen).classList.add('active');
+    const s = btn.dataset.screen;
+    if (s === 'guesswho') initGuessWho();
+    if (s === 'build') initBuild();
+    if (s === 'memory') initMemory();
+    if (s === 'detective') initDetective();
+    if (s === 'quiz') initQuiz();
+    if (s === 'describe') initDescribe();
+  });
+});
+
+/* ============================================================
+   GUESS WHO
+============================================================ */
+let secretChar = null, askedQuestions = new Set();
+
+function initGuessWho() {
+  secretChar = characters[Math.floor(Math.random() * characters.length)];
+  askedQuestions.clear();
+  renderGuessWho();
+}
+
+function renderGuessWho() {
+  const container = document.getElementById('guesswhoContent');
+  const cards = characters.map(c => `
+    <div class="character-card" id="char-${c.id}" onclick="makeGuess(${c.id})">
+      ${makeCharacterSVG(c.svg, 120, 220)}
+      <div class="name">${c.name}</div>
+    </div>
+  `).join('');
+
+  const qBtns = questions.map((q, i) => {
+    const disabled = askedQuestions.has(i) ? 'disabled' : '';
+    const answer = askedQuestions.has(i)
+      ? `<span class="answer ${secretChar.traits[q.key] === q.val ? 'yes' : 'no'}">${secretChar.traits[q.key] === q.val ? 'YES ✓' : 'NO ✗'}</span>`
+      : '';
+    return `<button class="question-btn" ${disabled} onclick="askQuestion(${i})">${q.q} ${answer}</button>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="characters-grid">${cards}</div>
+    <div class="questions-panel"><h3>❓ Ask a question (${askedQuestions.size}/${questions.length}):</h3>${qBtns}</div>
+    <div class="feedback" id="guessFeedback"></div>
+  `;
+}
+
+function askQuestion(i) { askedQuestions.add(i); renderGuessWho(); }
+
+function makeGuess(id) {
+  const guess = characters.find(c => c.id === id);
+  const feedback = document.getElementById('guessFeedback');
+  if (guess.id === secretChar.id) {
+    document.getElementById(`char-${id}`).classList.add('winner');
+    feedback.className = 'feedback correct';
+    feedback.textContent = `🎉 Correct! It's ${secretChar.name}!`;
+    addScore(15);
+    showModal('🏆', 'Victory!', `${secretChar.name} is ${secretChar.fullDesc}.`);
+  } else {
+    document.getElementById(`char-${id}`).classList.add('eliminated');
+    feedback.className = 'feedback wrong';
+    feedback.textContent = `❌ No, it's not ${guess.name}. Try again!`;
+    addScore(-2);
+  }
+}
+
+/* ============================================================
+   BUILD A CHARACTER (все категории из Mind Map)
+============================================================ */
+const buildOptions = {
+  height:  { label: 'Height', options: ['tall', 'short', 'medium height', 'quite tall', 'rather short', 'very tall'] },
+  build:   { label: 'Build', options: ['slim', 'thin', 'skinny', 'slender', 'muscular', 'athletic', 'well-built', 'stocky', 'chubby', 'plump', 'overweight', 'medium build', 'petite', 'broad-shouldered', 'narrow-shouldered'] },
+  age:     { label: 'Age', options: ['young', 'middle-aged', 'elderly', 'old', 'a teenager', 'a child'] },
+  faceShape: { label: 'Face shape', options: ['oval', 'round', 'square', 'heart-shaped', 'long', 'triangular', 'diamond-shaped'] },
+  forehead:  { label: 'Forehead', options: ['normal', 'high', 'low', 'broad', 'narrow', 'wrinkled'] },
+  nose:    { label: 'Nose', options: ['straight', 'long', 'short', 'wide', 'narrow', 'hooked', 'turned-up', 'snub', 'flat', 'pointed', 'button'] },
+  mouth:   { label: 'Mouth', options: ['medium', 'big', 'small', 'wide', 'full lips', 'thin lips', 'rosy lips'] },
+  eyes:    { label: 'Eye colour', options: ['blue', 'green', 'brown', 'grey', 'hazel', 'black'] },
+  eyeShape:{ label: 'Eye shape', options: ['round', 'almond-shaped', 'narrow', 'deep-set', 'close-set', 'wide-set'] },
+  eyeSize: { label: 'Eye size', options: ['big', 'medium', 'small'] },
+  eyebrow: { label: 'Eyebrows', options: ['normal', 'thick', 'thin', 'dark', 'light', 'arched', 'straight', 'bushy'] },
+  eyelash: { label: 'Eyelashes', options: ['normal', 'long', 'short', 'thick', 'curly'] },
+  cheeks:  { label: 'Cheeks', options: ['normal', 'rosy', 'pale', 'chubby', 'hollow', 'freckled'] },
+  chin:    { label: 'Chin', options: ['round', 'square', 'pointed', 'double', 'strong'] },
+  skin:    { label: 'Skin', options: ['fair', 'pale', 'olive', 'tanned', 'dark'] },
+  hair:    { label: 'Hair', options: ['bald', 'balding', 'long blond', 'short dark', 'curly red', 'wavy brown', 'short grey', 'shoulder-length black', 'waist-length black', 'medium-length brown'] },
+  hairType:{ label: 'Hair type', options: ['straight', 'wavy', 'curly', 'frizzy', 'mohawk', 'buzz cut', 'dreadlocks', 'ponytail', 'bun', 'bob', 'fringe'] },
+  teeth:   { label: 'Teeth', options: ['normal', 'white', 'straight', 'crooked', 'gap', 'braces'] },
+  smile:   { label: 'Smile', options: ['friendly', 'bright', 'shy', 'kind', 'serious'] },
+  clothes: { label: 'Clothes', options: [
+    'blue T-shirt', 'red dress', 'green hoodie', 'black suit', 'yellow dress',
+    'purple sweater', 'blue shirt', 'brown coat', 'blue jacket', 'pink skirt',
+    'green shorts', 'orange T-shirt', 'blue jeans'
+  ]},
+  shoes:   { label: 'Shoes', options: ['white sneakers', 'black boots', 'pink heels', 'sandals', 'flip-flops', 'loafers'] },
+  special: { label: 'Special', options: ['none', 'glasses', 'a beard', 'a moustache', 'freckles', 'dimples', 'a mole', 'a scar', 'a tattoo', 'a piercing', 'a birthmark'] },
+  access:  { label: 'Accessories', options: ['none', 'earrings', 'necklace', 'watch', 'ring', 'bracelet', 'bag', 'hat', 'cap', 'scarf'] }
+};
+
+let currentChar = {
+  height: 'tall', build: 'slim', age: 'young', faceShape: 'oval', forehead: 'normal',
+  nose: 'straight', mouth: 'medium', eyes: 'blue', eyeShape: 'round', eyeSize: 'medium',
+  eyebrow: 'normal', eyelash: 'normal', cheeks: 'normal', chin: 'round',
+  skin: 'fair', hair: 'long blond', hairType: 'wavy', teeth: 'normal',
+  smile: 'friendly', clothes: 'blue T-shirt', shoes: 'white sneakers',
+  special: 'none', access: 'none'
+};
+
+function buildSVGFromOptions() {
+  const cfg = {
+    hairColor: 'dark', hairType: 'short', hairLength: 'short',
+    eyeColor: '#4A90E2', eyeShape: 'round', eyeSize: 'medium',
+    skinColor: '#FFD9B3',
+    shirtColor: '#4A90E2', pantsColor: '#2E5AAC',
+    shoeColor: '#ffffff', dressColor: null,
+    jacketColor: null, coatColor: null, skirtColor: null,
+    shortsColor: null, sweaterColor: null, hoodieColor: null,
+    glasses: false, beard: false, moustache: false,
+    freckles: false, dimples: false, mole: false,
+    scar: false, tattoo: false, piercing: false, birthmark: false,
+    smileType: 'friendly', teeth: 'normal',
+    noseType: 'straight', mouthType: 'medium',
+    eyebrowType: 'normal', eyelashType: 'normal',
+    cheekType: 'normal', chinType: 'round', faceShape: 'oval',
+    foreheadType: 'normal',
+    gender: 'm', bald: false,
+    age: 'young', heightType: 'medium height',
+    buildType: 'medium',
+    earrings: false, necklace: false, watch: false,
+    ring: false, bracelet: false, bag: false,
+    hat: false, cap: false, scarf: false,
+    clothesType: 'tshirt', shoesType: 'sneakers'
+  };
+
+  cfg.heightType = currentChar.height;
+  cfg.buildType = currentChar.build;
+  cfg.age = currentChar.age;
+  cfg.faceShape = currentChar.faceShape;
+  cfg.foreheadType = currentChar.forehead;
+  cfg.noseType = currentChar.nose;
+  cfg.mouthType = currentChar.mouth;
+  cfg.smileType = currentChar.smile;
+  cfg.teeth = currentChar.teeth;
+  cfg.eyebrowType = currentChar.eyebrow;
+  cfg.eyelashType = currentChar.eyelash;
+  cfg.cheekType = currentChar.cheeks;
+  cfg.chinType = currentChar.chin;
+  cfg.eyeSize = currentChar.eyeSize;
+  cfg.eyeShape = currentChar.eyeShape;
+
+  // Hair
+  if (currentChar.hair === 'bald') cfg.bald = true;
+  else if (currentChar.hair === 'balding') { cfg.hairType = 'balding'; cfg.hairColor = 'grey'; }
+  else if (currentChar.hair === 'long blond') { cfg.hairColor = 'blond'; cfg.hairLength = 'long'; }
+  else if (currentChar.hair === 'short dark') { cfg.hairColor = 'dark'; cfg.hairLength = 'short'; }
+  else if (currentChar.hair === 'curly red') { cfg.hairColor = 'red'; cfg.hairType = 'curly'; cfg.hairLength = 'short'; }
+  else if (currentChar.hair === 'wavy brown') { cfg.hairColor = 'brown'; cfg.hairLength = 'long'; }
+  else if (currentChar.hair === 'short grey') { cfg.hairColor = 'grey'; cfg.hairLength = 'short'; }
+  else if (currentChar.hair === 'shoulder-length black') { cfg.hairColor = 'black'; cfg.hairLength = 'shoulder-length'; }
+  else if (currentChar.hair === 'waist-length black') { cfg.hairColor = 'black'; cfg.hairLength = 'waist-length'; }
+  else if (currentChar.hair === 'medium-length brown') { cfg.hairColor = 'brown'; cfg.hairLength = 'medium-length'; }
+
+  // Hair type override
+  const ht = currentChar.hairType;
+  if (['straight','wavy','curly','frizzy','mohawk','buzz cut','dreadlocks','ponytail','bun','bob','fringe'].includes(ht)) {
+    cfg.hairType = ht === 'buzz cut' ? 'buzz cut' : (ht === 'ponytail' ? 'ponytail' : (ht === 'bun' ? 'bun' : (ht === 'bob' ? 'bob' : ht)));
+  }
+
+  // Eyes
+  if (currentChar.eyes === 'blue') cfg.eyeColor = '#4A90E2';
+  else if (currentChar.eyes === 'green') cfg.eyeColor = '#4DD4AC';
+  else if (currentChar.eyes === 'brown') cfg.eyeColor = '#6B4423';
+  else if (currentChar.eyes === 'grey') cfg.eyeColor = '#8B8B8B';
+  else if (currentChar.eyes === 'hazel') cfg.eyeColor = '#8B6914';
+  else if (currentChar.eyes === 'black') cfg.eyeColor = '#1a1a1a';
+
+  // Skin
+  if (currentChar.skin === 'fair') cfg.skinColor = '#FFE0CC';
+  else if (currentChar.skin === 'pale') cfg.skinColor = '#FFF0E0';
+  else if (currentChar.skin === 'olive') cfg.skinColor = '#D9A77A';
+  else if (currentChar.skin === 'tanned') cfg.skinColor = '#C68B5C';
+  else if (currentChar.skin === 'dark') cfg.skinColor = '#8B5A3C';
+
+  // Clothes
+  const clothesMap = {
+    'blue T-shirt':   { type: 'tshirt',  shirt: '#4A90E2', pants: '#2E5AAC' },
+    'red dress':      { type: 'dress',   dress: '#FF5C7A' },
+    'green hoodie':   { type: 'hoodie',  hoodie: '#4DD4AC', pants: '#2d3748' },
+    'black suit':     { type: 'suit',    shirt: '#2d3748', pants: '#1a1a1a' },
+    'yellow dress':   { type: 'dress',   dress: '#FFE066' },
+    'purple sweater': { type: 'sweater', sweater: '#A375FF', pants: '#2d3748' },
+    'blue shirt':     { type: 'shirt',   shirt: '#4A90E2', pants: '#2E5AAC' },
+    'brown coat':     { type: 'coat',    coat: '#6B4423', pants: '#3D2817' },
+    'blue jacket':    { type: 'jacket',  jacket: '#4A90E2', pants: '#2E5AAC' },
+    'pink skirt':     { type: 'skirt',   skirt: '#FF6B9D', shirt: '#FFFFFF' },
+    'green shorts':   { type: 'shorts',  shorts: '#4DD4AC', shirt: '#FFFFFF' },
+    'orange T-shirt': { type: 'tshirt',  shirt: '#FFB84D', pants: '#2E5AAC' },
+    'blue jeans':     { type: 'jeans',   shirt: '#4A90E2', pants: '#3A5A8C' }
+  };
+  const cl = clothesMap[currentChar.clothes] || clothesMap['blue T-shirt'];
+  cfg.clothesType = cl.type;
+  if (cl.shirt) cfg.shirtColor = cl.shirt;
+  if (cl.pants) cfg.pantsColor = cl.pants;
+  if (cl.dress) { cfg.dressColor = cl.dress; cfg.gender = 'f'; }
+  if (cl.hoodie) cfg.hoodieColor = cl.hoodie;
+  if (cl.sweater) cfg.sweaterColor = cl.sweater;
+  if (cl.coat) cfg.coatColor = cl.coat;
+  if (cl.jacket) cfg.jacketColor = cl.jacket;
+  if (cl.skirt) { cfg.skirtColor = cl.skirt; cfg.gender = 'f'; }
+  if (cl.shorts) cfg.shortsColor = cl.shorts;
+
+  // Shoes
+  const shoesMap = {
+    'white sneakers': { color: '#ffffff', type: 'sneakers' },
+    'black boots':    { color: '#2d3748', type: 'boots' },
+    'pink heels':     { color: '#FF6B9D', type: 'heels' },
+    'sandals':        { color: '#8BD94D', type: 'sandals' },
+    'flip-flops':     { color: '#4DD4AC', type: 'flip-flops' },
+    'loafers':        { color: '#6B4423', type: 'loafers' }
+  };
+  const sh = shoesMap[currentChar.shoes] || shoesMap['white sneakers'];
+  cfg.shoeColor = sh.color;
+  cfg.shoesType = sh.type;
+
+  // Special
+  if (currentChar.special === 'glasses') cfg.glasses = true;
+  else if (currentChar.special === 'a beard') cfg.beard = true;
+  else if (currentChar.special === 'a moustache') cfg.moustache = true;
+  else if (currentChar.special === 'freckles') cfg.freckles = true;
+  else if (currentChar.special === 'dimples') cfg.dimples = true;
+  else if (currentChar.special === 'a mole') cfg.mole = true;
+  else if (currentChar.special === 'a scar') cfg.scar = true;
+  else if (currentChar.special === 'a tattoo') cfg.tattoo = true;
+  else if (currentChar.special === 'a piercing') cfg.piercing = true;
+  else if (currentChar.special === 'a birthmark') cfg.birthmark = true;
+
+  // Accessories
+  if (currentChar.access === 'earrings') cfg.earrings = true;
+  else if (currentChar.access === 'necklace') cfg.necklace = true;
+  else if (currentChar.access === 'watch') cfg.watch = true;
+  else if (currentChar.access === 'ring') cfg.ring = true;
+  else if (currentChar.access === 'bracelet') cfg.bracelet = true;
+  else if (currentChar.access === 'bag') cfg.bag = true;
+  else if (currentChar.access === 'hat') cfg.hat = true;
+  else if (currentChar.access === 'cap') cfg.cap = true;
+  else if (currentChar.access === 'scarf') cfg.scarf = true;
+
+  return cfg;
+}
+
+function initBuild() {
+  const container = document.getElementById('buildOptions');
+  container.innerHTML = Object.keys(buildOptions).map(key => `
+    <div class="option-group">
+      <h4>${buildOptions[key].label}</h4>
+      <div class="option-chips">
+        ${buildOptions[key].options.map(opt => `
+          <div class="chip ${currentChar[key] === opt ? 'selected' : ''}" onclick="selectOption('${key}', '${opt}')">${opt}</div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+  updatePreview();
+}
+
+function selectOption(key, value) { currentChar[key] = value; initBuild(); }
+
+function updatePreview() {
+  const cfg = buildSVGFromOptions();
+  document.getElementById('avatarBig').innerHTML = makeCharacterSVG(cfg, 200, 380);
+
+  const specialText = currentChar.special !== 'none' ? ` They have ${currentChar.special}.` : '';
+  const accessText = currentChar.access !== 'none' ? ` They are wearing ${currentChar.access}.` : '';
+
+  const desc = `This person is ${currentChar.height}, ${currentChar.build}, ${currentChar.age}. ` +
+    `They have ${currentChar.hair} hair (${currentChar.hairType}), ${currentChar.eyes} ${currentChar.eyeShape} ${currentChar.eyeSize} eyes. ` +
+    `Their skin is ${currentChar.skin}, they have a ${currentChar.faceShape} face, ${currentChar.forehead} forehead and a ${currentChar.nose} nose. ` +
+    `They have a ${currentChar.mouth} mouth, a ${currentChar.smile} smile, ${currentChar.teeth} teeth, ${currentChar.eyebrow} eyebrows, ${currentChar.eyelash} eyelashes, ${currentChar.cheeks} cheeks and a ${currentChar.chin} chin.${specialText}${accessText} ` +
+    `They are wearing ${currentChar.clothes} and ${currentChar.shoes}.`;
+
+  document.getElementById('charDesc').textContent = desc;
+}
+
+function randomCharacter() {
+  Object.keys(buildOptions).forEach(key => {
+    const opts = buildOptions[key].options;
+    currentChar[key] = opts[Math.floor(Math.random() * opts.length)];
+  });
+  initBuild();
+  addScore(1);
+}
+
+/* ============================================================
+   MEMORY (30 пар — вся лексика)
+============================================================ */
+const memoryPairs = [
+  { en: 'slim', ua: 'стрункий' },
+  { en: 'stocky', ua: 'кремезний' },
+  { en: 'muscular', ua: 'мускулистий' },
+  { en: 'petite', ua: 'мініатюрна' },
+  { en: 'slender', ua: 'витончений' },
+  { en: 'chubby', ua: 'пухкий' },
+  { en: 'tall', ua: 'високий' },
+  { en: 'short', ua: 'низький' },
+  { en: 'curly hair', ua: 'кучеряве волосся' },
+  { en: 'wavy hair', ua: 'хвилясте волосся' },
+  { en: 'straight hair', ua: 'пряме волосся' },
+  { en: 'bald', ua: 'лисий' },
+  { en: 'freckles', ua: 'веснянки' },
+  { en: 'a beard', ua: 'борода' },
+  { en: 'a moustache', ua: 'вуса' },
+  { en: 'glasses', ua: 'окуляри' },
+  { en: 'almond-shaped', ua: 'мигдалеподібні' },
+  { en: 'hooked nose', ua: 'ніс з горбинкою' },
+  { en: 'turned-up nose', ua: 'кирпатий ніс' },
+  { en: 'button nose', ua: 'ніс-ґудзик' },
+  { en: 'dimples', ua: 'ямки на щоках' },
+  { en: 'wrinkles', ua: 'зморшки' },
+  { en: 'earrings', ua: 'сережки' },
+  { en: 'a necklace', ua: 'намисто' },
+  { en: 'a watch', ua: 'годинник' },
+  { en: 'a ring', ua: 'каблучка' },
+  { en: 'a bracelet', ua: 'браслет' },
+  { en: 'a scarf', ua: 'шарф' },
+  { en: 'a hoodie', ua: 'худі' },
+  { en: 'braces', ua: 'брекети' }
+];
+
+let memoryState = { first: null, second: null, lock: false, matched: 0, attempts: 0 };
+
+function initMemory() {
+  memoryState = { first: null, second: null, lock: false, matched: 0, attempts: 0 };
+  const cards = [];
+  memoryPairs.forEach((p, i) => {
+    cards.push({ id: i, text: p.en });
+    cards.push({ id: i, text: p.ua });
+  });
+  cards.sort(() => Math.random() - 0.5);
+  const grid = document.getElementById('memoryGrid');
+  grid.innerHTML = cards.map(c => `
+    <div class="memory-card" data-id="${c.id}" onclick="flipCard(this)">
+      <span class="content">${c.text}</span>
+    </div>
+  `).join('');
+}
+
+function flipCard(el) {
+  if (memoryState.lock) return;
+  if (el.classList.contains('flipped') || el.classList.contains('matched')) return;
+  el.classList.add('flipped');
+  if (!memoryState.first) {
+    memoryState.first = el;
+  } else {
+    memoryState.second = el;
+    memoryState.lock = true;
+    memoryState.attempts++;
+    if (memoryState.first.dataset.id === memoryState.second.dataset.id) {
+      setTimeout(() => {
+        memoryState.first.classList.add('matched');
+        memoryState.second.classList.add('matched');
+        memoryState.matched++;
+        addScore(5);
+        memoryState.first = null;
+        memoryState.second = null;
+        memoryState.lock = false;
+        if (memoryState.matched === memoryPairs.length) {
+          showModal('🎉', 'All pairs found!', `Attempts: ${memoryState.attempts}. Great job!`);
+        }
+      }, 500);
+    } else {
+      setTimeout(() => {
+        memoryState.first.classList.remove('flipped');
+        memoryState.second.classList.remove('flipped');
+        memoryState.first = null;
+        memoryState.second = null;
+        memoryState.lock = false;
+      }, 900);
+    }
+  }
+}
+
+/* ============================================================
+   DETECTIVE (10 дел)
+============================================================ */
+const detectiveCases = [
+  {
+    case: 'A cake was stolen from the bakery!',
+    description: 'He is <strong>tall</strong> and <strong>slim</strong>. He has <strong>short dark</strong> hair and <strong>blue</strong> eyes. He wears <strong>glasses</strong> and has a <strong>beard</strong>. He is wearing a <strong>blue T-shirt</strong>.',
+    suspects: [{ charId: 1, correct: true }, { charId: 3, correct: false }, { charId: 5, correct: false }, { charId: 7, correct: false }]
+  },
+  {
+    case: 'A rare book was stolen from the library!',
+    description: 'She is a <strong>young woman</strong>. She is <strong>medium height</strong> and <strong>slim</strong>. She has <strong>long wavy blonde</strong> hair and <strong>green</strong> eyes. She has <strong>freckles</strong>, <strong>earrings</strong> and a <strong>necklace</strong>, and is wearing a <strong>red dress</strong>.',
+    suspects: [{ charId: 2, correct: true }, { charId: 6, correct: false }, { charId: 4, correct: false }, { charId: 8, correct: false }]
+  },
+  {
+    case: 'A window was broken in the museum!',
+    description: 'It was a <strong>short</strong> and <strong>stocky</strong> man. He has <strong>short red</strong> hair and a <strong>beard</strong>. He has <strong>brown</strong> eyes and is wearing <strong>black boots</strong>.',
+    suspects: [{ charId: 3, correct: true }, { charId: 1, correct: false }, { charId: 7, correct: false }, { charId: 5, correct: false }]
+  },
+  {
+    case: 'A painting was stolen from the gallery!',
+    description: 'She is <strong>tall</strong> and <strong>slim</strong>. She has <strong>long straight blond</strong> hair and <strong>blue</strong> eyes. She wears <strong>earrings</strong> and a <strong>bracelet</strong>, and is wearing a <strong>pink sweater</strong>.',
+    suspects: [{ charId: 6, correct: true }, { charId: 2, correct: false }, { charId: 4, correct: false }, { charId: 12, correct: false }]
+  },
+  {
+    case: 'A diamond necklace was stolen!',
+    description: 'She is <strong>short</strong> and <strong>petite</strong>. She has <strong>shoulder-length straight blond</strong> hair and <strong>green</strong> eyes. She has <strong>braces</strong> and <strong>freckles</strong>. She wears <strong>earrings</strong>, a <strong>necklace</strong>, a <strong>bracelet</strong> and has a <strong>bag</strong>.',
+    suspects: [{ charId: 12, correct: true }, { charId: 4, correct: false }, { charId: 2, correct: false }, { charId: 10, correct: false }]
+  },
+  {
+    case: 'A car was vandalized in the parking lot!',
+    description: 'He is <strong>tall</strong> and <strong>muscular</strong>. He has <strong>curly brown</strong> hair and <strong>brown</strong> eyes. He has a <strong>bright</strong> smile, <strong>braces</strong> and <strong>freckles</strong>. He is wearing a <strong>green T-shirt</strong>.',
+    suspects: [{ charId: 9, correct: true }, { charId: 1, correct: false }, { charId: 11, correct: false }, { charId: 7, correct: false }]
+  },
+  {
+    case: 'A shop window was smashed!',
+    description: 'She is <strong>tall</strong> and <strong>muscular</strong>. She has <strong>long curly black</strong> hair, <strong>brown</strong> eyes and <strong>dark skin</strong>. She wears <strong>earrings</strong> and a <strong>pink dress</strong>.',
+    suspects: [{ charId: 13, correct: true }, { charId: 15, correct: false }, { charId: 2, correct: false }, { charId: 10, correct: false }]
+  },
+  {
+    case: 'A wallet was stolen from a café!',
+    description: 'He is <strong>short</strong> and <strong>stocky</strong>. He has <strong>short wavy blond</strong> hair, <strong>green</strong> eyes and wears <strong>glasses</strong>. He is wearing an <strong>orange shirt</strong> and <strong>loafers</strong>.',
+    suspects: [{ charId: 18, correct: true }, { charId: 1, correct: false }, { charId: 14, correct: false }, { charId: 16, correct: false }]
+  },
+  {
+    case: 'A precious gem was stolen from a museum!',
+    description: 'She is <strong>medium height</strong> and <strong>petite</strong>. She has <strong>shoulder-length curly black</strong> hair, <strong>brown</strong> eyes and <strong>dark skin</strong>. She wears <strong>earrings</strong> and a <strong>necklace</strong>, and is wearing a <strong>yellow dress</strong>.',
+    suspects: [{ charId: 19, correct: true }, { charId: 13, correct: false }, { charId: 15, correct: false }, { charId: 17, correct: false }]
+  },
+  {
+    case: 'A car was keyed in the parking lot!',
+    description: 'He is <strong>tall</strong> and <strong>muscular</strong>. He has a <strong>buzz cut</strong>, <strong>blue</strong> eyes and a <strong>beard</strong>. He has a <strong>tattoo</strong> and is wearing a <strong>green T-shirt</strong>.',
+    suspects: [{ charId: 20, correct: true }, { charId: 9, correct: false }, { charId: 11, correct: false }, { charId: 14, correct: false }]
+  }
+];
+
+function initDetective() {
+  const c = detectiveCases[Math.floor(Math.random() * detectiveCases.length)];
+  const container = document.getElementById('detectiveContent');
+  container.innerHTML = `
+    <div class="case-file">🚨 <strong>${c.case}</strong><br><br>"${c.description}"</div>
+    <div class="suspects-grid">
+      ${c.suspects.map(s => {
+        const char = characters.find(ch => ch.id === s.charId);
+        return `
+          <div class="suspect" onclick="solveCase(this, ${s.correct})">
+            ${makeCharacterSVG(char.svg, 130, 240)}
+            <div class="name">${char.name}</div>
+            <div class="info">${char.fullDesc}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="feedback" id="detectiveFeedback"></div>
+  `;
+}
+
+function solveCase(el, correct) {
+  const feedback = document.getElementById('detectiveFeedback');
+  const allSuspects = document.querySelectorAll('.suspect');
+  if (correct) {
+    el.classList.add('correct');
+    feedback.className = 'feedback correct';
+    feedback.textContent = '🎉 Correct! You solved the case!';
+    addScore(25);
+    allSuspects.forEach(s => s.style.pointerEvents = 'none');
+    showModal('🕵️', 'Case solved!', 'Great job, detective! +25 points');
+  } else {
+    el.classList.add('wrong');
+    feedback.className = 'feedback wrong';
+    feedback.textContent = '❌ Not this one. Try again!';
+    addScore(-3);
+  }
+}
+
+/* ============================================================
+   QUIZ (30 вопросов)
+============================================================ */
+const quizQuestions = [
+  { q: 'She has ___ hair. (кучеряве)', o: ['curly', 'straight', 'bald', 'wavy'], a: 'curly' },
+  { q: 'He is ___ . (лисий)', o: ['bald', 'curly', 'wavy', 'thick'], a: 'bald' },
+  { q: 'She has ___ eyes. (миндалеподібні)', o: ['almond-shaped', 'round', 'square', 'oval'], a: 'almond-shaped' },
+  { q: 'He has a ___ nose. (з горбинкою)', o: ['hooked', 'straight', 'flat', 'snub'], a: 'hooked' },
+  { q: 'She is of ___ height. (середнього)', o: ['medium', 'tall', 'short', 'very'], a: 'medium' },
+  { q: 'He is ___ . (мускулистий)', o: ['muscular', 'thin', 'petite', 'slim'], a: 'muscular' },
+  { q: 'She has ___ skin. (світла)', o: ['fair', 'dark', 'tanned', 'olive'], a: 'fair' },
+  { q: 'He wears ___ . (окуляри)', o: ['glasses', 'a beard', 'freckles', 'braids'], a: 'glasses' },
+  { q: 'She is wearing a ___ . (сукня)', o: ['dress', 'shirt', 'jeans', 'suit'], a: 'dress' },
+  { q: 'He has a ___ smile. (привітна)', o: ['friendly', 'shy', 'bright', 'serious'], a: 'friendly' },
+  { q: 'She has ___ hair. (хвилясте)', o: ['wavy', 'straight', 'curly', 'bald'], a: 'wavy' },
+  { q: 'He is ___ . (кремезний)', o: ['stocky', 'slim', 'petite', 'thin'], a: 'stocky' },
+  { q: 'She has ___ eyebrows. (дугоподібні)', o: ['arched', 'thick', 'thin', 'straight'], a: 'arched' },
+  { q: 'He has ___ lips. (повні)', o: ['full', 'thin', 'rosy', 'wide'], a: 'full' },
+  { q: 'She has ___ cheeks. (рожеві)', o: ['rosy', 'pale', 'hollow', 'chubby'], a: 'rosy' },
+  { q: 'He is wearing ___ . (куртка)', o: ['a jacket', 'a dress', 'a skirt', 'shorts'], a: 'a jacket' },
+  { q: 'She is wearing ___ . (сережки)', o: ['earrings', 'a scarf', 'a hat', 'glasses'], a: 'earrings' },
+  { q: 'He has ___ hair. (коротке)', o: ['short', 'long', 'bald', 'wavy'], a: 'short' },
+  { q: 'She has ___ eyes. (великі)', o: ['big', 'small', 'narrow', 'deep-set'], a: 'big' },
+  { q: 'He is ___ . (худий)', o: ['thin', 'stocky', 'muscular', 'broad-shouldered'], a: 'thin' },
+  { q: 'She has ___ hair. (руде)', o: ['red', 'black', 'grey', 'blond'], a: 'red' },
+  { q: 'He has a ___ nose. (прямий)', o: ['straight', 'hooked', 'flat', 'wide'], a: 'straight' },
+  { q: 'She is wearing ___ . (намисто)', o: ['a necklace', 'earrings', 'a ring', 'a bag'], a: 'a necklace' },
+  { q: 'He has ___ hair. (густе)', o: ['thick', 'thin', 'fine', 'coarse'], a: 'thick' },
+  { q: 'She is ___ . (мініатюрна)', o: ['petite', 'tall', 'stocky', 'broad-shouldered'], a: 'petite' },
+  { q: 'He is wearing ___ . (худі)', o: ['a hoodie', 'a suit', 'a dress', 'a coat'], a: 'a hoodie' },
+  { q: 'She has ___ eyelashes. (довгі)', o: ['long', 'short', 'thick', 'curly'], a: 'long' },
+  { q: 'He has ___ teeth. (брекети)', o: ['braces', 'white', 'straight', 'crooked'], a: 'braces' },
+  { q: 'She is wearing ___ . (шарф)', o: ['a scarf', 'a hat', 'a cap', 'a bag'], a: 'a scarf' },
+  { q: 'He has a ___ chin. (квадратне)', o: ['square', 'round', 'pointed', 'double'], a: 'square' }
+];
+
+let quizState = { current: 0, score: 0, timeLeft: 15, timer: null, locked: false };
+
+function initQuiz() {
+  quizState = { current: 0, score: 0, timeLeft: 15, timer: null, locked: false };
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const container = document.getElementById('quizContent');
+  if (quizState.current >= quizQuestions.length) {
+    container.innerHTML = `
+      <div style="text-align:center; padding: 30px;">
+        <div style="font-size: 5em; margin-bottom: 15px;">🏆</div>
+        <h3 style="font-size: 1.8em; margin-bottom: 15px;">Game over!</h3>
+        <p style="font-size: 1.3em;">Correct: <strong style="color:#FFB84D">${quizState.score}/${quizQuestions.length}</strong></p>
+        <p style="font-size: 1.1em; color:#4a5568; margin-top:10px; font-weight:700;">${quizState.score >= 24 ? '🌟 Excellent!' : quizState.score >= 15 ? '👍 Not bad!' : '💪 Try again!'}</p>
+      </div>
+    `;
+    return;
+  }
+  const q = quizQuestions[quizState.current];
+  const progress = (quizState.current / quizQuestions.length) * 100;
+  container.innerHTML = `
+    <div class="quiz-progress"><div class="quiz-progress-bar" style="width: ${progress}%"></div></div>
+    <div class="quiz-timer">⏱️ <span id="timer">${quizState.timeLeft}</span>s</div>
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">
+      ${q.o.map(opt => `<button class="quiz-option" onclick="answerQuiz(this, '${opt}', '${q.a}')">${opt}</button>`).join('')}
+    </div>
+    <div class="feedback" id="quizFeedback"></div>
+  `;
+  startQuizTimer();
+}
+
+function startQuizTimer() {
+  clearInterval(quizState.timer);
+  quizState.timeLeft = 15;
+  quizState.locked = false;
+  quizState.timer = setInterval(() => {
+    quizState.timeLeft--;
+    const t = document.getElementById('timer');
+    if (t) t.textContent = quizState.timeLeft;
+    if (quizState.timeLeft <= 0) {
+      clearInterval(quizState.timer);
+      if (!quizState.locked) {
+        quizState.locked = true;
+        document.getElementById('quizFeedback').className = 'feedback wrong';
+        document.getElementById('quizFeedback').textContent = '⏰ Time is up!';
+        addScore(-2);
+        setTimeout(() => { quizState.current++; renderQuiz(); }, 1200);
+      }
+    }
+  }, 1000);
+}
+
+function answerQuiz(el, chosen, correct) {
+  if (quizState.locked) return;
+  quizState.locked = true;
+  clearInterval(quizState.timer);
+  const feedback = document.getElementById('quizFeedback');
+  const allOptions = document.querySelectorAll('.quiz-option');
+  if (chosen === correct) {
+    el.classList.add('correct');
+    feedback.className = 'feedback correct';
+    feedback.textContent = '✅ Correct! +5 points';
+    addScore(5);
+    quizState.score++;
+  } else {
+    el.classList.add('wrong');
+    allOptions.forEach(o => { if (o.textContent === correct) o.classList.add('correct'); });
+    feedback.className = 'feedback wrong';
+    feedback.textContent = `❌ Correct answer: ${correct}`;
+    addScore(-1);
+  }
+  setTimeout(() => { quizState.current++; renderQuiz(); }, 1400);
+}
+
+/* ============================================================
+   DESCRIBE IT
+============================================================ */
+let describeChar = null;
+
+function initDescribe() {
+  describeChar = characters[Math.floor(Math.random() * characters.length)];
+  renderDescribe();
+}
+
+function renderDescribe() {
+  const container = document.getElementById('describeContent');
+  const char = describeChar;
+  const otherChars = characters.filter(c => c.id !== char.id);
+  const shuffled = otherChars.sort(() => Math.random() - 0.5).slice(0, 3);
+  const options = [char, ...shuffled].sort(() => Math.random() - 0.5);
+
+  container.innerHTML = `
+    <div style="text-align:center; margin-bottom: 20px;">
+      ${makeCharacterSVG(char.svg, 180, 340)}
+    </div>
+    <p style="text-align:center; font-size:1.1em; color:#4a5568; font-weight:700; margin-bottom:20px;">
+      Which description matches this character?
+    </p>
+    <div class="quiz-options" style="max-width: 900px;">
+      ${options.map((c, i) => `
+        <button class="quiz-option" onclick="answerDescribe(this, ${c.id === char.id}, '${c.name}')">
+          ${c.fullDesc}
+        </button>
+      `).join('')}
+    </div>
+    <div class="feedback" id="describeFeedback"></div>
+  `;
+}
+
+function answerDescribe(el, isCorrect, name) {
+  const feedback = document.getElementById('describeFeedback');
+  const allOptions = document.querySelectorAll('.quiz-option');
+  allOptions.forEach(o => o.disabled = true);
+  if (isCorrect) {
+    el.classList.add('correct');
+    feedback.className = 'feedback correct';
+    feedback.textContent = `✅ Correct! It's ${name}! +10 points`;
+    addScore(10);
+    setTimeout(() => initDescribe(), 2000);
+  } else {
+    el.classList.add('wrong');
+    feedback.className = 'feedback wrong';
+    feedback.textContent = `❌ Not quite. It's ${describeChar.name}!`;
+    addScore(-2);
+    setTimeout(() => initDescribe(), 2500);
+  }
+}
+
+initBuild();
+</script>
+</body>
+</html>
